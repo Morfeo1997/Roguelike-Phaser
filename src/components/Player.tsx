@@ -16,7 +16,7 @@ export class Player {
   private health: number = 3;
   private maxHealth: number = 3;
   private isInvulnerable: boolean = false;
-  private invulnerabilityDuration: number = 1000; // 1 segundo de invulnerabilidad
+  private invulnerabilityDuration: number = 1000;
   private lastDamageTime: number = 0;
   private isDead: boolean = false;
 
@@ -26,13 +26,12 @@ export class Player {
   }
 
   private create(x: number, y: number) {
-    // Crear sprite del jugador
-    this.sprite = this.scene.physics.add.sprite(x, y, '');
-    this.sprite.setSize(24, 24);
-    this.sprite.setDisplaySize(24, 24);
+    // Crear sprite del jugador usando la imagen cargada
+    this.sprite = this.scene.physics.add.sprite(x, y, 'player-sprite');
     
-    // Crear apariencia visual
-    this.createVisuals();
+    // Ajustar tamaño de colisión y visual
+    this.sprite.setSize(24, 24);
+    this.sprite.setDisplaySize(32, 32); // Ajusta según el tamaño que quieras mostrar
     
     // Configurar física
     this.sprite.setDrag(400);
@@ -46,31 +45,67 @@ export class Player {
     this.createDashEffect();
   }
 
-  private createVisuals() {
-    const graphics = this.scene.add.graphics();
-    
-    // Círculo principal con gradiente
-    graphics.fillGradientStyle(0x3b82f6, 0x1e40af, 0x1e40af, 0x3b82f6, 1);
-    graphics.fillCircle(0, 0, 12);
-    
-    // Borde brillante
-    graphics.lineStyle(2, 0x60a5fa, 0.8);
-    graphics.strokeCircle(0, 0, 12);
-    
-    // Punto central
-    graphics.fillStyle(0xfbbf24, 1);
-    graphics.fillCircle(0, 0, 3);
-    
-    // Convertir a textura
-    graphics.generateTexture('player', 24, 24);
-    graphics.destroy();
-    
-    this.sprite.setTexture('player');
+  private createAnimations() {
+    // Solo crear animaciones si no existen ya
+    if (!this.scene.anims.exists('player-idle')) {
+      // Animación de idle (reposo)
+      this.scene.anims.create({
+        key: 'player-idle',
+        frames: this.scene.anims.generateFrameNumbers('player-spritesheet', { 
+          start: 0, 
+          end: 3 
+        }),
+        frameRate: 4,
+        repeat: -1
+      });
+    }
+
+    if (!this.scene.anims.exists('player-walk')) {
+      // Animación de caminar
+      this.scene.anims.create({
+        key: 'player-walk',
+        frames: this.scene.anims.generateFrameNumbers('player-spritesheet', { 
+          start: 4, 
+          end: 7 
+        }),
+        frameRate: 8,
+        repeat: -1
+      });
+    }
+
+    if (!this.scene.anims.exists('player-attack')) {
+      // Animación de ataque
+      this.scene.anims.create({
+        key: 'player-attack',
+        frames: this.scene.anims.generateFrameNumbers('player-spritesheet', { 
+          start: 8, 
+          end: 11 
+        }),
+        frameRate: 12,
+        repeat: 0 // No repetir, solo una vez
+      });
+    }
+
+    if (!this.scene.anims.exists('player-dash')) {
+      // Animación de dash
+      this.scene.anims.create({
+        key: 'player-dash',
+        frames: this.scene.anims.generateFrameNumbers('player-spritesheet', { 
+          start: 12, 
+          end: 15 
+        }),
+        frameRate: 10,
+        repeat: 0
+      });
+    }
+
+    // Iniciar con animación idle
+    this.sprite.play('player-idle');
   }
 
   private createParticleEffect() {
-    // Crear sistema de partículas para efecto de movimiento
-    const particles = this.scene.add.particles(0, 0, 'player', {
+    // Para las partículas, usamos la misma textura del jugador
+    const particles = this.scene.add.particles(0, 0, 'player-sprite', {
       scale: { start: 0.1, end: 0 },
       speed: { min: 20, max: 50 },
       lifespan: 200,
@@ -84,15 +119,13 @@ export class Player {
   }
 
   private createAttackEffect() {
-    // Crear efecto visual de ataque
     this.attackEffect = this.scene.add.circle(0, 0, this.attackRange, 0xff4444, 0);
     this.attackEffect.setStrokeStyle(3, 0xff6666, 0);
     this.attackEffect.setVisible(false);
   }
 
   private createDashEffect() {
-    // Crear efecto de partículas para el dash
-    this.dashEffect = this.scene.add.particles(0, 0, 'player', {
+    this.dashEffect = this.scene.add.particles(0, 0, 'player-sprite', {
       scale: { start: 0.3, end: 0 },
       speed: { min: 100, max: 200 },
       lifespan: 300,
@@ -102,6 +135,7 @@ export class Player {
       emitting: false
     });
   }
+
   public update(inputVector: { x: number; y: number }) {
     // Actualizar cooldowns
     if (this.attackCooldown > 0) {
@@ -121,19 +155,29 @@ export class Player {
       // Activar partículas cuando se mueve
       this.particles.setVisible(true);
       
-      // Rotación sutil basada en dirección
-      const angle = Math.atan2(inputVector.y, inputVector.x);
-      this.sprite.setRotation(angle + Math.PI / 2);
+      // Voltear el sprite según la dirección horizontal
+      if (inputVector.x > 0) {
+        this.sprite.setFlipX(false);
+      } else if (inputVector.x < 0) {
+        this.sprite.setFlipX(true);
+      }
+      
     } else if (!this.isAttacking && !this.isDashing) {
       // Desactivar partículas cuando está quieto
       this.particles.setVisible(false);
     }
     
-    // Efecto de pulsación sutil
-    const time = this.scene.time.now * 0.003;
-    const baseScale = this.isAttacking ? 1.2 : (this.isDashing ? 0.8 : 1);
-    const scale = baseScale + Math.sin(time) * 0.05;
-    this.sprite.setScale(scale);
+    // Efecto de escala durante estados especiales
+    if (this.isAttacking) {
+      this.sprite.setScale(1.1);
+    } else if (this.isDashing) {
+      this.sprite.setScale(0.9);
+    } else {
+      // Efecto de pulsación sutil solo cuando no está en acción
+      const time = this.scene.time.now * 0.003;
+      const scale = 1 + Math.sin(time) * 0.03;
+      this.sprite.setScale(scale);
+    }
     
     // Actualizar invulnerabilidad
     if (this.isInvulnerable && this.scene.time.now - this.lastDamageTime > this.invulnerabilityDuration) {
@@ -153,7 +197,7 @@ export class Player {
     if (this.attackCooldown > 0 || this.isAttacking) return;
 
     this.isAttacking = true;
-    this.attackCooldown = 500; // 500ms cooldown
+    this.attackCooldown = 500;
 
     // Calcular dirección del ataque
     const dx = targetX - this.sprite.x;
@@ -163,6 +207,13 @@ export class Player {
     if (distance > 0) {
       const normalizedX = dx / distance;
       const normalizedY = dy / distance;
+      
+      // Voltear sprite según dirección del ataque
+      if (dx > 0) {
+        this.sprite.setFlipX(false);
+      } else if (dx < 0) {
+        this.sprite.setFlipX(true);
+      }
       
       // Posicionar efecto de ataque
       const attackX = this.sprite.x + normalizedX * (this.attackRange * 0.6);
@@ -190,10 +241,6 @@ export class Player {
       // Pequeño impulso hacia adelante durante el ataque
       this.sprite.setVelocity(normalizedX * 100, normalizedY * 100);
       
-      // Rotar hacia la dirección del ataque
-      const angle = Math.atan2(dy, dx);
-      this.sprite.setRotation(angle + Math.PI / 2);
-      
       // Verificar si golpeamos algún enemigo
       this.checkEnemyHit(attackX, attackY, enemies);
     }
@@ -213,11 +260,12 @@ export class Player {
       }
     });
   }
+
   public dash(movementVector: { x: number; y: number }) {
     if (this.dashCooldown > 0 || this.isDashing || (movementVector.x === 0 && movementVector.y === 0)) return;
 
     this.isDashing = true;
-    this.dashCooldown = 1000; // 1 segundo de cooldown
+    this.dashCooldown = 1000;
 
     // Activar efecto de partículas
     this.dashEffect.setPosition(this.sprite.x, this.sprite.y);
@@ -229,6 +277,13 @@ export class Player {
       movementVector.x * dashForce,
       movementVector.y * dashForce
     );
+
+    // Voltear sprite según dirección del dash
+    if (movementVector.x > 0) {
+      this.sprite.setFlipX(false);
+    } else if (movementVector.x < 0) {
+      this.sprite.setFlipX(true);
+    }
 
     // Efecto visual de dash
     this.scene.tweens.add({
@@ -244,6 +299,7 @@ export class Player {
     });
   }
 
+  // ... resto de métodos sin cambios
   public getAttackCooldownPercent(): number {
     return Math.max(0, this.attackCooldown / 500);
   }
@@ -272,10 +328,10 @@ export class Player {
     
     if (this.health <= 0) {
       this.die();
-      return true; // Jugador murió
+      return true;
     }
     
-    return false; // Jugador sigue vivo
+    return false;
   }
 
   private die() {
@@ -292,7 +348,7 @@ export class Player {
     });
     
     // Efecto de partículas de muerte
-    const deathEffect = this.scene.add.particles(this.sprite.x, this.sprite.y, 'player', {
+    const deathEffect = this.scene.add.particles(this.sprite.x, this.sprite.y, 'player-sprite', {
       scale: { start: 0.5, end: 0 },
       speed: { min: 100, max: 200 },
       lifespan: 1000,
@@ -332,7 +388,7 @@ export class Player {
     this.sprite.setScale(1);
     this.sprite.setAlpha(1);
     this.sprite.setVelocity(0, 0);
-    this.sprite.setRotation(0);
+    this.sprite.setFlipX(false);
     
     // Reactivar partículas si estaban desactivadas
     if (this.particles) {

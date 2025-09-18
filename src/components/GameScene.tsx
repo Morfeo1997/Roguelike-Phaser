@@ -23,6 +23,16 @@ export class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
   }
 
+  // ¡NUEVO! Método preload para cargar la imagen del jugador
+  preload() {
+    // Cargar la imagen del jugador desde assets/sprites/player.png
+    this.load.image('player-sprite', 'assets/sprites/player.png');
+    
+    // Si más adelante quieres agregar otros sprites, puedes hacerlo aquí:
+    // this.load.image('enemy-sprite', 'assets/sprites/enemy.png');
+    // this.load.image('projectile-sprite', 'assets/sprites/projectile.png');
+  }
+
   create() {
     // Crear el mundo expandido
     this.createWorld();
@@ -30,7 +40,7 @@ export class GameScene extends Phaser.Scene {
     // Crear elementos decorativos
     this.createWorldObjects();
     
-    // Crear el jugador
+    // Crear el jugador (ahora ya está cargada la imagen 'player-sprite')
     this.player = new Player(this, 400, 300);
     
     // Crear grupo de enemigos
@@ -83,6 +93,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
   }
+
   private createWorld() {
     const worldWidth = 2000;
     const worldHeight = 1500;
@@ -192,6 +203,7 @@ export class GameScene extends Phaser.Scene {
     // Prevenir menú contextual del click derecho
     this.input.mouse!.disableContextMenu();
   }
+
   private setupCamera() {
     // Configurar cámara para seguir al jugador
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
