@@ -17,7 +17,7 @@ export class Enemy {
   private attackCooldown: number = 1500;
   private contactDamage: number = 1;
   private lastContactDamageTime: number = 0;
-  private contactDamageCooldown: number = 1000; // 1 segundo entre daños por contacto
+  private contactDamageCooldown: number = 1000;
 
   constructor(scene: Phaser.Scene, x: number, y: number, player: Phaser.Physics.Arcade.Sprite) {
     this.scene = scene;
@@ -26,13 +26,10 @@ export class Enemy {
   }
 
   private create(x: number, y: number) {
-    // Crear sprite del enemigo
-    this.sprite = this.scene.physics.add.sprite(x, y, '');
+    // Crear sprite del enemigo usando la imagen cargada
+    this.sprite = this.scene.physics.add.sprite(x, y, 'enemy-sprite');
     this.sprite.setSize(20, 20);
-    this.sprite.setDisplaySize(20, 20);
-    
-    // Crear apariencia visual
-    this.createVisuals();
+    this.sprite.setDisplaySize(24, 24); // Ajusta el tamaño visual
     
     // Configurar física
     this.sprite.setDrag(200);
@@ -44,28 +41,6 @@ export class Enemy {
     
     // Almacenar referencia en el sprite para acceso fácil
     this.sprite.setData('enemy', this);
-  }
-
-  private createVisuals() {
-    const graphics = this.scene.add.graphics();
-    
-    // Círculo principal (rojo para enemigo)
-    graphics.fillGradientStyle(0xdc2626, 0x991b1b, 0x991b1b, 0xdc2626, 1);
-    graphics.fillCircle(0, 0, 10);
-    
-    // Borde
-    graphics.lineStyle(2, 0xef4444, 0.8);
-    graphics.strokeCircle(0, 0, 10);
-    
-    // Punto central más oscuro
-    graphics.fillStyle(0x7f1d1d, 1);
-    graphics.fillCircle(0, 0, 3);
-    
-    // Convertir a textura
-    graphics.generateTexture('enemy', 20, 20);
-    graphics.destroy();
-    
-    this.sprite.setTexture('enemy');
   }
 
   private createHealthBar() {
@@ -156,9 +131,12 @@ export class Enemy {
         normalizedY * this.moveSpeed
       );
       
-      // Rotar hacia el jugador
-      const angle = Math.atan2(dy, dx);
-      this.sprite.setRotation(angle + Math.PI / 2);
+      // Voltear sprite según dirección
+      if (dx > 0) {
+        this.sprite.setFlipX(false);
+      } else if (dx < 0) {
+        this.sprite.setFlipX(true);
+      }
     }
   }
 
@@ -179,9 +157,6 @@ export class Enemy {
         attackEffect.destroy();
       }
     });
-    
-    // Aquí podrías agregar lógica para dañar al jugador
-    // Por ahora solo es efecto visual
   }
 
   public takeDamage(damage: number = 1): boolean {
@@ -208,10 +183,10 @@ export class Enemy {
     
     if (this.health <= 0) {
       this.die();
-      return true; // Enemigo murió
+      return true;
     }
     
-    return false; // Enemigo sigue vivo
+    return false;
   }
 
   private die() {
@@ -230,8 +205,8 @@ export class Enemy {
       }
     });
     
-    // Efecto de partículas de muerte
-    const deathEffect = this.scene.add.particles(this.sprite.x, this.sprite.y, 'enemy', {
+    // Efecto de partículas de muerte usando el sprite del enemigo
+    const deathEffect = this.scene.add.particles(this.sprite.x, this.sprite.y, 'enemy-sprite', {
       scale: { start: 0.3, end: 0 },
       speed: { min: 50, max: 100 },
       lifespan: 500,

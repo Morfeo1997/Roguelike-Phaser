@@ -25,17 +25,21 @@ export class GameScene extends Phaser.Scene {
 
   // ¡NUEVO! Método preload para cargar la imagen del jugador
   preload() {
+    this.load.image('bg-tile', 'assets/backgrounds/grass-tile.png');
     // Cargar la imagen del jugador desde assets/sprites/player.png
     this.load.image('player-sprite', 'assets/sprites/player.png');
     
     // Si más adelante quieres agregar otros sprites, puedes hacerlo aquí:
-    // this.load.image('enemy-sprite', 'assets/sprites/enemy.png');
+    this.load.image('enemy-sprite', 'assets/sprites/enemy.png');
     // this.load.image('projectile-sprite', 'assets/sprites/projectile.png');
   }
 
   create() {
     // Crear el mundo expandido
     this.createWorld();
+
+    this.background = this.add.tileSprite(0, 0, 2000, 1500, 'bg-tile');
+    this.background.setOrigin(0, 0);
     
     // Crear elementos decorativos
     this.createWorldObjects();
