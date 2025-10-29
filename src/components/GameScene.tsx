@@ -28,6 +28,11 @@ export class GameScene extends Phaser.Scene {
     this.load.image('bg-tile', 'assets/backgrounds/grass-tile.png');
     // Cargar la imagen del jugador desde assets/sprites/player.png
     this.load.image('player-sprite', 'assets/sprites/player.png');
+
+    this.load.spritesheet('plants-sheet', 'assets/sprites/plants-sprite-sheet.jpg', {
+      frameWidth: 61 ,  // ← Ancho de CADA planta
+      frameHeight: 65, // ← Alto de CADA planta
+    });
     
     // Si más adelante quieres agregar otros sprites, puedes hacerlo aquí:
     this.load.image('enemy-sprite', 'assets/sprites/enemy.png');
