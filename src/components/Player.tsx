@@ -6,7 +6,7 @@ export class Player {
   private scene: Phaser.Scene;
   private moveSpeed: number = 200;
   private particles!: Phaser.GameObjects.Particles.ParticleEmitter;
-  private attackRange: number = 80;
+  private attackRange: number = 65;
   private isAttacking: boolean = false;
   private isDashing: boolean = false;
   private attackCooldown: number = 0;
@@ -126,8 +126,8 @@ export class Player {
 
   private createDashEffect() {
     this.dashEffect = this.scene.add.particles(0, 0, 'player-sprite', {
-      scale: { start: 0.3, end: 0 },
-      speed: { min: 100, max: 200 },
+      scale: { start: 0.1, end: 0 },
+      speed: { min: 200, max: 400 },
       lifespan: 300,
       quantity: 3,
       tint: 0x00ff88,
@@ -216,8 +216,8 @@ export class Player {
       }
       
       // Posicionar efecto de ataque
-      const attackX = this.sprite.x + normalizedX * (this.attackRange * 0.6);
-      const attackY = this.sprite.y + normalizedY * (this.attackRange * 0.6);
+      const attackX = this.sprite.x + normalizedX * (this.attackRange * 0.1);
+      const attackY = this.sprite.y + normalizedY * (this.attackRange * 0.1);
       
       this.attackEffect.setPosition(attackX, attackY);
       this.attackEffect.setVisible(true);
@@ -265,14 +265,14 @@ export class Player {
     if (this.dashCooldown > 0 || this.isDashing || (movementVector.x === 0 && movementVector.y === 0)) return;
 
     this.isDashing = true;
-    this.dashCooldown = 1000;
+    this.dashCooldown = 1500;
 
     // Activar efecto de partículas
     this.dashEffect.setPosition(this.sprite.x, this.sprite.y);
     this.dashEffect.start();
 
     // Aplicar impulso de dash
-    const dashForce = 400;
+    const dashForce = 800;
     this.sprite.setVelocity(
       movementVector.x * dashForce,
       movementVector.y * dashForce
@@ -289,7 +289,7 @@ export class Player {
     this.scene.tweens.add({
       targets: this.sprite,
       alpha: 0.6,
-      duration: 100,
+      duration: 50,
       yoyo: true,
       repeat: 2,
       onComplete: () => {
