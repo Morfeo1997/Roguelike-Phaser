@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import { Player } from './Player';
 import { Enemy } from './Enemy';
+import { RangedEnemy } from './RangedEnemy';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
   private enemies: Enemy[] = [];
   private enemyGroup!: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private rangedEnemies: RangedEnemy[] = [];
   private wasdKeys!: {
     w: Phaser.Input.Keyboard.Key;
     a: Phaser.Input.Keyboard.Key;
@@ -28,6 +30,8 @@ export class GameScene extends Phaser.Scene {
     this.load.image('bg-tile', 'assets/backgrounds/grass-tile.png');
     // Cargar la imagen del jugador desde assets/sprites/player.png
     this.load.image('player-sprite', 'assets/sprites/player.png');
+
+    this.load.image('projectile-sprite', 'assets/sprites/projectile.png');
 
     this.load.spritesheet('plants-sheet', 'assets/sprites/plants-sprite-sheet.jpg', {
       frameWidth: 61 ,  // ← Ancho de CADA planta
@@ -76,29 +80,53 @@ export class GameScene extends Phaser.Scene {
 
   private createEnemies() {
     // Crear varios enemigos en posiciones aleatorias
+    const meleeEnemyCount = 5;
     const enemyCount = 8;
     
-    for (let i = 0; i < enemyCount; i++) {
+    for (let i = 0; i < meleeEnemyCount; i++) {
+        let x, y;
+        let validPosition = false;
+        let attempts = 0;
+        
+        while (!validPosition && attempts < 20) {
+          x = Phaser.Math.Between(100, 1900);
+          y = Phaser.Math.Between(100, 1400);
+          
+          const distanceToPlayer = Phaser.Math.Distance.Between(x, y, 400, 300);
+          if (distanceToPlayer > 150) {
+            validPosition = true;
+          }
+          attempts++;
+        }
+      
+      if (validPosition) {
+        const enemy = new Enemy(this, x!, y!, this.player.sprite);
+        this.enemies.push(enemy);
+        this.enemyGroup.add(enemy.getSprite());
+      }
+    }
+      const rangedEnemyCount = 3;
+    
+    for (let i = 0; i < rangedEnemyCount; i++) {
       let x, y;
       let validPosition = false;
       let attempts = 0;
       
-      // Buscar una posición válida (no muy cerca del jugador)
       while (!validPosition && attempts < 20) {
         x = Phaser.Math.Between(100, 1900);
         y = Phaser.Math.Between(100, 1400);
         
         const distanceToPlayer = Phaser.Math.Distance.Between(x, y, 400, 300);
-        if (distanceToPlayer > 150) {
+        if (distanceToPlayer > 200) {
           validPosition = true;
         }
         attempts++;
       }
       
       if (validPosition) {
-        const enemy = new Enemy(this, x!, y!, this.player.sprite);
-        this.enemies.push(enemy);
-        this.enemyGroup.add(enemy.getSprite());
+        const rangedEnemy = new RangedEnemy(this, x!, y!, this.player.sprite);
+        this.rangedEnemies.push(rangedEnemy);
+        this.enemyGroup.add(rangedEnemy.getSprite());
       }
     }
   }
@@ -354,6 +382,9 @@ export class GameScene extends Phaser.Scene {
     this.enemies.forEach(enemy => enemy.destroy());
     this.enemies = [];
     this.enemyGroup.clear(true, true);
+
+    this.rangedEnemies.forEach(enemy => enemy.destroy());
+    this.rangedEnemies = [];
     
     // Crear nuevos enemigos
     this.createEnemies();
@@ -393,6 +424,15 @@ export class GameScene extends Phaser.Scene {
         this.enemies.splice(index, 1);
       }
     });
+
+    this.rangedEnemies.forEach((enemy, index) => {
+    if (enemy.isEnemyAlive()) {
+      enemy.update();
+      enemy.checkProjectileHits(this.player.sprite);
+    } else {
+      this.rangedEnemies.splice(index, 1);
+    }
+  });
     
     // Actualizar información en la UI
     this.registry.set('playerPosition', {
