@@ -230,7 +230,7 @@ export class GameScene extends Phaser.Scene {
         // Convertir coordenadas de pantalla a coordenadas del mundo
         const worldX = pointer.worldX;
         const worldY = pointer.worldY;
-        this.player.attack(worldX, worldY, this.enemies);
+        this.player.attack(worldX, worldY, this.enemies, this.rangedEnemies);
       } else if (pointer.rightButtonDown()) {
         // Click derecho para dash
         this.player.dash(this.currentMovementVector);

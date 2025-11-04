@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
 import { Enemy } from './Enemy';
+import { RangedEnemy } from './RangedEnemy';
 
 export class Player {
   public sprite!: Phaser.Physics.Arcade.Sprite;
   private scene: Phaser.Scene;
   private moveSpeed: number = 200;
   private particles!: Phaser.GameObjects.Particles.ParticleEmitter;
-  private attackRange: number = 65;
+  private attackRange: number = 70;
   private isAttacking: boolean = false;
   private isDashing: boolean = false;
   private attackCooldown: number = 0;
@@ -193,7 +194,7 @@ export class Player {
     }
   }
 
-  public attack(targetX: number, targetY: number, enemies: Enemy[]) {
+  public attack(targetX: number, targetY: number, enemies: Enemy[], rangedEnemies: RangedEnemy[] = []) {
     if (this.attackCooldown > 0 || this.isAttacking) return;
 
     this.isAttacking = true;
@@ -242,11 +243,11 @@ export class Player {
       this.sprite.setVelocity(normalizedX * 100, normalizedY * 100);
       
       // Verificar si golpeamos algún enemigo
-      this.checkEnemyHit(attackX, attackY, enemies);
+      this.checkEnemyHit(attackX, attackY, enemies, rangedEnemies);
     }
   }
 
-  private checkEnemyHit(attackX: number, attackY: number, enemies: Enemy[]) {
+  private checkEnemyHit(attackX: number, attackY: number, enemies: Enemy[], rangedEnemies: RangedEnemy[] = []) {
     enemies.forEach(enemy => {
       if (!enemy.isEnemyAlive()) return;
       
@@ -257,6 +258,18 @@ export class Player {
       
       if (distance <= this.attackRange) {
         enemy.takeDamage(1);
+      }
+    });
+    rangedEnemies.forEach(rangedEnemy => {
+      if (!rangedEnemy.isEnemyAlive()) return;
+      
+      const distance = Phaser.Math.Distance.Between(
+        attackX, attackY,
+        rangedEnemy.getSprite().x, rangedEnemy.getSprite().y
+      );
+      
+      if (distance <= this.attackRange) {
+        rangedEnemy.takeDamage(1);
       }
     });
   }
