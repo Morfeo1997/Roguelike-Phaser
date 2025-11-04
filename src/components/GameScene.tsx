@@ -274,21 +274,31 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createGameOverScreen() {
-    this.gameOverScreen = this.add.container(this.cameras.main.width / 2, this.cameras.main.height / 2);
-    this.gameOverScreen.setScrollFactor(0);
+    this.gameOverScreen = this.add.container(0, 0);
     this.gameOverScreen.setDepth(1000);
+    this.gameOverScreen.setVisible(false);
+
+    const centerX = this.cameras.main.width / 2;
+    const centerY = this.cameras.main.height / 2;
     
     // Fondo semi-transparente
-    const overlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.8);
+    const overlay = this.add.rectangle(
+      centerX, 
+      centerY, 
+      this.cameras.main.width, 
+      this.cameras.main.height, 
+      0x000000, 
+      0.8
+    );
     this.gameOverScreen.add(overlay);
     
     // Panel principal
-    const panel = this.add.rectangle(0, 0, 400, 300, 0x1e293b, 0.95);
+    const panel = this.add.rectangle(centerX, centerY, 400, 300, 0x1e293b, 0.95);
     panel.setStrokeStyle(4, 0x475569);
     this.gameOverScreen.add(panel);
     
     // Título "Game Over"
-    const gameOverText = this.add.text(0, -80, 'GAME OVER', {
+    const gameOverText = this.add.text(centerX, centerY - 80, 'GAME OVER', {
       fontSize: '48px',
       color: '#ef4444',
       fontStyle: 'bold'
@@ -299,7 +309,7 @@ export class GameScene extends Phaser.Scene {
     this.gameOverScreen.add(gameOverText);
     
     // Mensaje adicional
-    const messageText = this.add.text(0, -20, 'Los enemigos te han derrotado', {
+    const messageText = this.add.text(centerX, centerY -20, 'Los enemigos te han derrotado', {
       fontSize: '18px',
       color: '#cbd5e1'
     });
@@ -307,12 +317,12 @@ export class GameScene extends Phaser.Scene {
     this.gameOverScreen.add(messageText);
     
     // Botón "Jugar de nuevo"
-    const buttonBg = this.add.rectangle(0, 60, 200, 50, 0x3b82f6);
+    const buttonBg = this.add.rectangle(centerX, centerY + 60, 200, 50, 0x3b82f6);
     buttonBg.setStrokeStyle(2, 0x60a5fa);
     buttonBg.setInteractive({ useHandCursor: true });
     this.gameOverScreen.add(buttonBg);
     
-    const buttonText = this.add.text(0, 60, 'Jugar de nuevo', {
+    const buttonText = this.add.text(centerX, centerY + 60, 'Jugar de nuevo', {
       fontSize: '18px',
       color: '#ffffff',
       fontStyle: 'bold'
@@ -343,15 +353,109 @@ export class GameScene extends Phaser.Scene {
     
     // Funcionalidad del botón
     buttonBg.on('pointerdown', () => {
+      console.log('Restart button clicked');
       this.restartGame();
+    });
+
+    buttonBg.on('pointerup', () => {
+    console.log('Restart button released'); // Debug
     });
     
     // Ocultar inicialmente
     this.gameOverScreen.setVisible(false);
   }
 
+  private buildGameOverUI() {
+  // Limpiar cualquier elemento previo del container
+  this.gameOverScreen.removeAll(true);
+  
+  // Obtener la posición actual del jugador
+  const playerX = this.player.sprite.x;
+  const playerY = this.player.sprite.y;
+  
+  // Fondo semi-transparente que cubre toda la pantalla visible
+  const overlay = this.add.rectangle(
+    playerX, 
+    playerY, 
+    this.cameras.main.width * 2, 
+    this.cameras.main.height * 2, 
+    0x000000, 
+    0.8
+  );
+  this.gameOverScreen.add(overlay);
+  
+  // Panel principal centrado en la posición del jugador
+  const panel = this.add.rectangle(playerX, playerY, 400, 300, 0x1e293b, 0.95);
+  panel.setStrokeStyle(4, 0x475569);
+  this.gameOverScreen.add(panel);
+  
+  // Título "Game Over"
+  const gameOverText = this.add.text(playerX, playerY - 80, 'GAME OVER', {
+    fontSize: '48px',
+    color: '#ef4444',
+    fontStyle: 'bold'
+  });
+  gameOverText.setOrigin(0.5);
+  gameOverText.setStroke('#7f1d1d', 4);
+  gameOverText.setShadow(0, 4, '#000000', 8, false, true);
+  this.gameOverScreen.add(gameOverText);
+  
+  // Mensaje adicional
+  const messageText = this.add.text(playerX, playerY - 20, 'Los enemigos te han derrotado', {
+    fontSize: '18px',
+    color: '#cbd5e1'
+  });
+  messageText.setOrigin(0.5);
+  this.gameOverScreen.add(messageText);
+  
+  // Botón "Jugar de nuevo"
+  const buttonBg = this.add.rectangle(playerX, playerY + 60, 200, 50, 0x3b82f6);
+  buttonBg.setStrokeStyle(2, 0x60a5fa);
+  buttonBg.setInteractive({ useHandCursor: true });
+  this.gameOverScreen.add(buttonBg);
+  
+  const buttonText = this.add.text(playerX, playerY + 60, 'Jugar de nuevo', {
+    fontSize: '18px',
+    color: '#ffffff',
+    fontStyle: 'bold'
+  });
+  buttonText.setOrigin(0.5);
+  this.gameOverScreen.add(buttonText);
+  
+  // Efectos hover del botón
+  buttonBg.on('pointerover', () => {
+    buttonBg.setFillStyle(0x2563eb);
+    this.tweens.add({
+      targets: buttonBg,
+      scaleX: 1.05,
+      scaleY: 1.05,
+      duration: 100
+    });
+  });
+  
+  buttonBg.on('pointerout', () => {
+    buttonBg.setFillStyle(0x3b82f6);
+    this.tweens.add({
+      targets: buttonBg,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 100
+    });
+  });
+  
+  // Funcionalidad del botón
+  buttonBg.on('pointerdown', () => {
+    this.restartGame();
+  });
+}
+
   private showGameOver() {
     this.isGameOver = true;
+  
+  // Construir la UI en la posición actual del jugador
+    this.buildGameOverUI();
+    
+    // Mostrar el container
     this.gameOverScreen.setVisible(true);
     
     // Animar entrada
@@ -378,13 +482,16 @@ export class GameScene extends Phaser.Scene {
     // Reiniciar jugador
     this.player.reset(400, 300);
     
-    // Limpiar enemigos existentes
+    // Limpiar enemigos cuerpo a cuerpo existentes
     this.enemies.forEach(enemy => enemy.destroy());
     this.enemies = [];
-    this.enemyGroup.clear(true, true);
-
+    
+    // Limpiar enemigos a distancia existentes
     this.rangedEnemies.forEach(enemy => enemy.destroy());
     this.rangedEnemies = [];
+    
+    // Limpiar el grupo de enemigos
+    this.enemyGroup.clear(true, true);
     
     // Crear nuevos enemigos
     this.createEnemies();
@@ -398,7 +505,7 @@ export class GameScene extends Phaser.Scene {
     // Resetear registros de la UI
     this.registry.set('playerHealth', this.player.getHealth());
     this.registry.set('playerMaxHealth', this.player.getMaxHealth());
-    this.registry.set('enemyCount', this.enemies.length);
+    this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length);
     this.registry.set('attackCooldown', 0);
     this.registry.set('dashCooldown', 0);
   }
@@ -445,7 +552,7 @@ export class GameScene extends Phaser.Scene {
     this.registry.set('dashCooldown', this.player.getDashCooldownPercent());
     
     // Actualizar contador de enemigos
-    this.registry.set('enemyCount', this.enemies.length);
+    this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length);
     
     // Actualizar información de salud del jugador
     this.registry.set('playerHealth', this.player.getHealth());
