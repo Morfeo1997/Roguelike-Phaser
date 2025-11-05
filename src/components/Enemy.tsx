@@ -27,7 +27,7 @@ export class Enemy {
 
   private create(x: number, y: number) {
     // Crear sprite del enemigo usando la imagen cargada
-    this.sprite = this.scene.physics.add.sprite(x, y, 'enemy-sprite');
+    this.sprite = this.scene.physics.add.sprite(x, y, 'enemy-melee-sprite');
     this.sprite.setSize(20, 20);
     this.sprite.setDisplaySize(24, 24); // Ajusta el tamaño visual
     

@@ -32,15 +32,14 @@ export class GameScene extends Phaser.Scene {
     this.load.image('player-sprite', 'assets/sprites/player.png');
 
     this.load.image('projectile-sprite', 'assets/sprites/projectile.png');
-
-    this.load.spritesheet('plants-sheet', 'assets/sprites/plants-sprite-sheet.jpg', {
-      frameWidth: 61 ,  // ← Ancho de CADA planta
-      frameHeight: 65, // ← Alto de CADA planta
-    });
     
     // Si más adelante quieres agregar otros sprites, puedes hacerlo aquí:
-    this.load.image('enemy-sprite', 'assets/sprites/enemy.png');
-    // this.load.image('projectile-sprite', 'assets/sprites/projectile.png');
+
+    this.load.image('enemy-melee-sprite', 'assets/sprites/enemy-melee.png');
+    this.load.image('enemy-ranged-sprite', 'assets/sprites/enemy-ranged.png');
+
+    this.load.image('tree-sprite', 'assets/sprites/tree.png');
+    this.load.image('rock-sprite', 'assets/sprites/rock.png');
   }
 
   create() {
@@ -189,27 +188,40 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createTree(x: number, y: number) {
-    const tree = this.add.circle(x, y, 30, 0x059669);
-    tree.setStrokeStyle(4, 0x047857);
+    const tree = this.add.sprite(x, y, 'tree-sprite');
     
     const trunk = this.add.rectangle(x, y + 25, 8, 15, 0x92400e);
     
     this.worldObjects.add(tree);
     this.worldObjects.add(trunk);
+
+    tree.setDisplaySize(60, 80);
+
+    this.worldObjects.add(tree);
     
     // Hacer que los árboles sean sólidos
     this.physics.add.existing(tree, true);
+
+    const treeBody = tree.body as Phaser.Physics.Arcade.StaticBody;
+    treeBody.setSize(40, 50); // Ajusta el área de colisión
+    treeBody.setOffset(10, 15);
   }
 
   private createRock(x: number, y: number) {
-    const size = Phaser.Math.Between(15, 25);
-    const rock = this.add.circle(x, y, size, 0x64748b);
-    rock.setStrokeStyle(2, 0x475569);
+    const rock = this.add.sprite(x, y, 'rock-sprite');
+
+    const scale = Phaser.Math.FloatBetween(0.8, 1.2);
+    rock.setScale(scale);
     
     this.worldObjects.add(rock);
     
     // Hacer que las rocas sean sólidas
     this.physics.add.existing(rock, true);
+
+    const rockBody = rock.body as Phaser.Physics.Arcade.StaticBody;
+    rockBody.setCircle(15);
+
+
   }
 
   private setupControls() {

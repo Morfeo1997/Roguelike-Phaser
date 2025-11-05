@@ -28,11 +28,11 @@ export class RangedEnemy {
   }
 
   private create(x: number, y: number) {
-    // Crear sprite del enemigo (usar un color diferente para distinguirlo)
-    this.sprite = this.scene.physics.add.sprite(x, y, 'enemy-sprite');
+    // Crear sprite del enemigo a distancia con su sprite propio
+    this.sprite = this.scene.physics.add.sprite(x, y, 'enemy-ranged-sprite');
     this.sprite.setSize(20, 20);
     this.sprite.setDisplaySize(24, 24);
-    this.sprite.setTint(0x9333ea); // Color púrpura para diferenciarlo
+    // Ya no necesitamos tint porque tiene su propio sprite
     
     // Configurar física
     this.sprite.setDrag(200);
