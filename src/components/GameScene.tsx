@@ -190,12 +190,10 @@ export class GameScene extends Phaser.Scene {
   private createTree(x: number, y: number) {
     const tree = this.add.sprite(x, y, 'tree-sprite');
     
-    const trunk = this.add.rectangle(x, y + 25, 8, 15, 0x92400e);
     
     this.worldObjects.add(tree);
-    this.worldObjects.add(trunk);
 
-    tree.setDisplaySize(60, 80);
+    tree.setDisplaySize(80, 80);
 
     this.worldObjects.add(tree);
     
