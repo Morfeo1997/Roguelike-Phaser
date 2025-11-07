@@ -40,6 +40,11 @@ export class GameScene extends Phaser.Scene {
 
     this.load.image('tree-sprite', 'assets/sprites/tree.png');
     this.load.image('rock-sprite', 'assets/sprites/rock.png');
+    this.load.audio('enemy-damage-sound', 'assets/sounds/effects/enemy-damage.wav');
+    this.load.audio('player-damage-sound', 'assets/sounds/effects/player-damage.wav');
+    this.load.audio('enemy-shoot-sound', 'assets/sounds/effects/enemy-shoot.wav');
+    this.load.audio('player-attack-sound', 'assets/sounds/effects/player-attack.wav');
+
   }
 
   create() {
@@ -48,6 +53,8 @@ export class GameScene extends Phaser.Scene {
 
     this.background = this.add.tileSprite(0, 0, 2000, 1500, 'bg-tile');
     this.background.setOrigin(0, 0);
+
+    this.sound.volume = 0.7;
     
     // Crear elementos decorativos
     this.createWorldObjects();

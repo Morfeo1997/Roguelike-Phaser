@@ -18,7 +18,7 @@ export class Enemy {
   private contactDamage: number = 1;
   private lastContactDamageTime: number = 0;
   private contactDamageCooldown: number = 1000;
-
+  private damageSound!: Phaser.Sound.BaseSound;
   constructor(scene: Phaser.Scene, x: number, y: number, player: Phaser.Physics.Arcade.Sprite) {
     this.scene = scene;
     this.player = player;
@@ -30,7 +30,7 @@ export class Enemy {
     this.sprite = this.scene.physics.add.sprite(x, y, 'enemy-melee-sprite');
     this.sprite.setSize(20, 20);
     this.sprite.setDisplaySize(24, 24); // Ajusta el tamaño visual
-    
+    this.damageSound = this.scene.sound.add('enemy-damage-sound', { volume: 0.4 });
     // Configurar física
     this.sprite.setDrag(200);
     this.sprite.setMaxVelocity(this.moveSpeed);
@@ -164,6 +164,7 @@ export class Enemy {
     
     this.health -= damage;
     this.lastDamageTime = this.scene.time.now;
+    this.damageSound.play();
     
     // Efecto de knockback
     const dx = this.sprite.x - this.player.x;

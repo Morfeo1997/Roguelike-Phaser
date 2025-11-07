@@ -12,8 +12,8 @@ export class RangedEnemy {
   private lastDamageTime: number = 0;
   private damageFlashDuration: number = 200;
   private healthBar!: Phaser.GameObjects.Graphics;
-  
-  // Configuración de comportamiento de disparo
+  private damageSound!: Phaser.Sound.BaseSound;
+  private shootSound!: Phaser.Sound.BaseSound;
   private detectionRange: number = 300;
   private shootingRange: number = 250;
   private optimalDistance: number = 200; // Distancia que prefiere mantener
@@ -32,7 +32,8 @@ export class RangedEnemy {
     this.sprite = this.scene.physics.add.sprite(x, y, 'enemy-ranged-sprite');
     this.sprite.setSize(20, 20);
     this.sprite.setDisplaySize(24, 24);
-    // Ya no necesitamos tint porque tiene su propio sprite
+    this.damageSound = this.scene.sound.add('enemy-damage-sound', { volume: 0.4 });
+    this.shootSound = this.scene.sound.add('enemy-shoot-sound', { volume: 0.5 });
     
     // Configurar física
     this.sprite.setDrag(200);
@@ -180,6 +181,7 @@ export class RangedEnemy {
 
   private shootAtPlayer() {
     this.lastShootTime = this.scene.time.now;
+    this.shootSound.play();
     
     // Crear proyectil apuntando al jugador
     const projectile = new Projectile(
@@ -247,6 +249,7 @@ export class RangedEnemy {
 
   public takeDamage(damage: number = 1): boolean {
     if (!this.isAlive) return false;
+    this.damageSound.play();
     
     this.health -= damage;
     this.lastDamageTime = this.scene.time.now;

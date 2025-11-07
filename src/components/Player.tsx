@@ -20,6 +20,8 @@ export class Player {
   private invulnerabilityDuration: number = 1000;
   private lastDamageTime: number = 0;
   private isDead: boolean = false;
+  private attackSound!: Phaser.Sound.BaseSound;
+  private damageSound!: Phaser.Sound.BaseSound;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
@@ -29,6 +31,9 @@ export class Player {
   private create(x: number, y: number) {
     // Crear sprite del jugador usando la imagen cargada
     this.sprite = this.scene.physics.add.sprite(x, y, 'player-sprite');
+
+    this.attackSound = this.scene.sound.add('player-attack-sound', { volume: 0.5 });
+    this.damageSound = this.scene.sound.add('player-damage-sound', { volume: 0.6 });
     
     // Ajustar tamaño de colisión y visual
     this.sprite.setSize(24, 24);
@@ -199,6 +204,7 @@ export class Player {
 
     this.isAttacking = true;
     this.attackCooldown = 500;
+    this.attackSound.play();
 
     // Calcular dirección del ataque
     const dx = targetX - this.sprite.x;
@@ -327,7 +333,7 @@ export class Player {
     this.health -= damage;
     this.lastDamageTime = this.scene.time.now;
     this.isInvulnerable = true;
-    
+    this.damageSound.play();
     // Efecto visual de daño
     this.scene.cameras.main.shake(200, 0.02);
     
