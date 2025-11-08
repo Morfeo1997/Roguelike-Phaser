@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 
 export class UIScene extends Phaser.Scene {
   private positionText!: Phaser.GameObjects.Text;
-  private controlsText!: Phaser.GameObjects.Text;
   private attackCooldownBar!: Phaser.GameObjects.Rectangle;
   private dashCooldownBar!: Phaser.GameObjects.Rectangle;
   private attackCooldownBg!: Phaser.GameObjects.Rectangle;
@@ -46,28 +45,21 @@ export class UIScene extends Phaser.Scene {
     // Crear corazones para mostrar la vida
     this.createHealthHearts();
     
-    // Texto de controles
-    this.controlsText = this.add.text(16, this.cameras.main.height - 160, 
-      'Controles:\nWASD/Flechas - Mover\nClick Izq - Atacar hacia cursor\nClick Der - Salto en dirección de movimiento\n¡Evita a los enemigos y derrota a todos!\n¡Tienes 3 vidas!', {
-      fontSize: '14px',
-      color: '#cbd5e1',
-      backgroundColor: 'rgba(15, 23, 42, 0.8)',
-      padding: { left: 8, right: 8, top: 4, bottom: 4 }
-    });
-    this.controlsText.setScrollFactor(0);
+    
     
     // Título del juego
-    const title = this.add.text(this.cameras.main.width / 2, 30, 'Vista Cenital - Phaser Game', {
-      fontSize: '24px',
-      color: '#f1f5f9',
+    const timeText = this.add.text(this.cameras.main.width / 2, 30, 'Tiempo: 60', {
+      fontSize: '32px',
+      color: '#10b981',
       fontStyle: 'bold'
     });
-    title.setOrigin(0.5, 0);
-    title.setScrollFactor(0);
+    timeText.setOrigin(0.5, 0);
+    timeText.setScrollFactor(0);
+    timeText.setStroke('#065f46', 3);
+    timeText.setShadow(0, 2, '#000000', 6, false, true);
     
-    // Agregar efecto de brillo al título
-    title.setStroke('#3b82f6', 2);
-    title.setShadow(0, 2, '#1e40af', 4, false, true);
+    // Guardar referencia para actualizar
+    this.registry.set('timeText', timeText);
     
     // Crear barras de cooldown
     this.createCooldownBars();

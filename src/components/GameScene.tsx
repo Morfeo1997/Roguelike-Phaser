@@ -20,7 +20,8 @@ export class GameScene extends Phaser.Scene {
   private currentMovementVector: { x: number; y: number } = { x: 0, y: 0 };
   private gameOverScreen!: Phaser.GameObjects.Container;
   private isGameOver: boolean = false;
-
+  private gameTimer!: Phaser.Time.TimerEvent;
+  private timeRemaining: number = 60;
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -76,6 +77,8 @@ export class GameScene extends Phaser.Scene {
     
     // Configurar cámara
     this.setupCamera();
+
+    this.startGameTimer();
     
     // Configurar colisiones
     this.setupCollisions();
@@ -304,6 +307,33 @@ export class GameScene extends Phaser.Scene {
     this.player.sprite.setData('player', this.player);
   }
 
+  private startGameTimer() {
+    // Inicializar tiempo restante
+    this.timeRemaining = 60;
+    this.registry.set('timeRemaining', this.timeRemaining);
+    
+    // Crear evento de temporizador que se ejecuta cada segundo
+    this.gameTimer = this.time.addEvent({
+      delay: 1000, // 1 segundo
+      callback: this.updateTimer,
+      callbackScope: this,
+      loop: true
+    });
+  }
+
+  private updateTimer() {
+    if (this.isGameOver) return;
+    
+    this.timeRemaining--;
+    this.registry.set('timeRemaining', this.timeRemaining);
+    
+    // Verificar si se acabó el tiempo
+    if (this.timeRemaining <= 0) {
+      this.showGameOver('¡Se acabó el tiempo!');
+    }
+  }
+
+
   private createGameOverScreen() {
     this.gameOverScreen = this.add.container(0, 0);
     this.gameOverScreen.setDepth(1000);
@@ -480,16 +510,21 @@ export class GameScene extends Phaser.Scene {
   });
 }
 
-  private showGameOver() {
+  private showGameOver(message: string = 'Los enemigos te han derrotado') {
     this.isGameOver = true;
+    
+    // Detener el temporizador
+    if (this.gameTimer) {
+      this.gameTimer.remove();
+    }
+    
+    // Guardar el mensaje en el registro
+    this.registry.set('gameOverMessage', message);
   
-  // Construir la UI en la posición actual del jugador
     this.buildGameOverUI();
     
-    // Mostrar el container
     this.gameOverScreen.setVisible(true);
     
-    // Animar entrada
     this.gameOverScreen.setAlpha(0);
     this.gameOverScreen.setScale(0.8);
     
@@ -502,7 +537,6 @@ export class GameScene extends Phaser.Scene {
       ease: 'Back.easeOut'
     });
     
-    // Pausar el juego
     this.physics.pause();
   }
 
@@ -510,30 +544,30 @@ export class GameScene extends Phaser.Scene {
     this.isGameOver = false;
     this.gameOverScreen.setVisible(false);
     
-    // Reiniciar jugador
+    // Reiniciar temporizador
+    this.timeRemaining = 60;
+    this.registry.set('timeRemaining', this.timeRemaining);
+    if (this.gameTimer) {
+      this.gameTimer.remove();
+    }
+    this.startGameTimer();
+    
     this.player.reset(400, 300);
     
-    // Limpiar enemigos cuerpo a cuerpo existentes
     this.enemies.forEach(enemy => enemy.destroy());
     this.enemies = [];
     
-    // Limpiar enemigos a distancia existentes
     this.rangedEnemies.forEach(enemy => enemy.destroy());
     this.rangedEnemies = [];
     
-    // Limpiar el grupo de enemigos
     this.enemyGroup.clear(true, true);
     
-    // Crear nuevos enemigos
     this.createEnemies();
     
-    // Reanudar física
     this.physics.resume();
     
-    // Resetear cámara
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
     
-    // Resetear registros de la UI
     this.registry.set('playerHealth', this.player.getHealth());
     this.registry.set('playerMaxHealth', this.player.getMaxHealth());
     this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length);

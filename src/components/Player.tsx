@@ -134,11 +134,11 @@ export class Player {
   private createDashEffect() {
     this.dashEffect = this.scene.add.particles(0, 0, 'player-sprite', {
       scale: { start: 0.1, end: 0 },
-      speed: { min: 200, max: 400 },
+      speed: { min: 300, max: 400 },
       lifespan: 300,
       quantity: 3,
       tint: 0x00ff88,
-      alpha: { start: 0.8, end: 0 },
+      alpha: { start: 0.5, end: 0 },
       emitting: false
     });
   }
@@ -285,7 +285,7 @@ export class Player {
     if (this.dashCooldown > 0 || this.isDashing || (movementVector.x === 0 && movementVector.y === 0)) return;
 
     this.isDashing = true;
-    this.dashCooldown = 1500;
+    this.dashCooldown = 1000;
 
     // Activar efecto de partículas
     this.dashEffect.setPosition(this.sprite.x, this.sprite.y);
