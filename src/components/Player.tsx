@@ -34,6 +34,7 @@ export class Player {
 
     this.attackSound = this.scene.sound.add('player-attack-sound', { volume: 0.5 });
     this.damageSound = this.scene.sound.add('player-damage-sound', { volume: 0.6 });
+    this.sprite.setCollideWorldBounds(true);
     
     // Ajustar tamaño de colisión y visual
     this.sprite.setSize(24, 24);

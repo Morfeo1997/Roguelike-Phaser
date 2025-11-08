@@ -95,11 +95,17 @@ export class GameScene extends Phaser.Scene {
         let attempts = 0;
         
         while (!validPosition && attempts < 20) {
-          x = Phaser.Math.Between(100, 1900);
-          y = Phaser.Math.Between(100, 1400);
+          x = Phaser.Math.Between(150, 1850);
+          y = Phaser.Math.Between(150, 1350);
           
           const distanceToPlayer = Phaser.Math.Distance.Between(x, y, 400, 300);
-          if (distanceToPlayer > 150) {
+          const minDistanceFromEdge = 100;
+          const tooCloseToEdge = 
+            x < minDistanceFromEdge || 
+            x > 2000 - minDistanceFromEdge ||
+            y < minDistanceFromEdge || 
+            y > 1500 - minDistanceFromEdge;
+          if (distanceToPlayer > 150 && !tooCloseToEdge) {
             validPosition = true;
           }
           attempts++;
@@ -153,6 +159,7 @@ export class GameScene extends Phaser.Scene {
     
     // Crear grid sutil
     this.createGrid(worldWidth, worldHeight);
+    this.createWorldBorder(worldWidth, worldHeight);
   }
 
   private createGrid(width: number, height: number) {
@@ -174,7 +181,14 @@ export class GameScene extends Phaser.Scene {
     }
     
     graphics.strokePath();
+    
   }
+
+  private createWorldBorder(width: number, height: number) {
+  const graphics = this.add.graphics();
+  graphics.lineStyle(4, 0xff4444, 0.8);
+  graphics.strokeRect(2, 2, width - 4, height - 4);
+}
 
   private createWorldObjects() {
     this.worldObjects = this.add.group();

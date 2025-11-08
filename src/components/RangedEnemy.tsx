@@ -39,6 +39,8 @@ export class RangedEnemy {
     this.sprite.setDrag(200);
     this.sprite.setMaxVelocity(this.moveSpeed);
     this.sprite.setCollideWorldBounds(true);
+    this.sprite.setBounce(0.3);
+    
     
     // Crear barra de vida
     this.createHealthBar();
