@@ -11,7 +11,7 @@ export class Enemy {
   private lastDamageTime: number = 0;
   private damageFlashDuration: number = 200;
   private healthBar!: Phaser.GameObjects.Graphics;
-  private detectionRange: number = 200;
+  private detectionRange: number = 500;
   private attackRange: number = 30;
   private lastAttackTime: number = 0;
   private attackCooldown: number = 1500;

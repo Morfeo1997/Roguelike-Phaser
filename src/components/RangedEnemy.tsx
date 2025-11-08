@@ -14,7 +14,7 @@ export class RangedEnemy {
   private healthBar!: Phaser.GameObjects.Graphics;
   private damageSound!: Phaser.Sound.BaseSound;
   private shootSound!: Phaser.Sound.BaseSound;
-  private detectionRange: number = 300;
+  private detectionRange: number = 500;
   private shootingRange: number = 250;
   private optimalDistance: number = 200; // Distancia que prefiere mantener
   private lastShootTime: number = 0;
