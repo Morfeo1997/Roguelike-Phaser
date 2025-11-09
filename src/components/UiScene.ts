@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 export class UIScene extends Phaser.Scene {
-  private positionText!: Phaser.GameObjects.Text;
+  private levelText!: Phaser.GameObjects.Text;
   private attackCooldownBar!: Phaser.GameObjects.Rectangle;
   private dashCooldownBar!: Phaser.GameObjects.Rectangle;
   private attackCooldownBg!: Phaser.GameObjects.Rectangle;
@@ -17,13 +17,15 @@ export class UIScene extends Phaser.Scene {
 
   create() {
     // Texto de posición del jugador
-    this.positionText = this.add.text(16, 16, 'Posición: (400, 300)', {
-      fontSize: '16px',
-      color: '#e2e8f0',
+    this.levelText = this.add.text(16, 16, 'Nivel: 1', {
+      fontSize: '20px',
+      color: '#fbbf24',
       backgroundColor: 'rgba(15, 23, 42, 0.8)',
-      padding: { left: 8, right: 8, top: 4, bottom: 4 }
+      padding: { left: 8, right: 8, top: 4, bottom: 4 },
+      fontStyle: 'bold'
     });
-    this.positionText.setScrollFactor(0);
+    this.levelText.setScrollFactor(0);
+    this.levelText.setStroke('#92400e', 2);
     
     // Contador de enemigos
     this.enemyCountText = this.add.text(16, 50, 'Enemigos: 8', {
@@ -132,11 +134,9 @@ export class UIScene extends Phaser.Scene {
   }
 
   update() {
-    // Actualizar posición del jugador
-    const playerPos = this.registry.get('playerPosition');
-    if (playerPos) {
-      this.positionText.setText(`Posición: (${playerPos.x}, ${playerPos.y})`);
-    }
+    
+    const currentLevel = this.registry.get('currentLevel') || 1;
+    this.levelText.setText(`Nivel: ${currentLevel}`);
     
     // Actualizar contador de enemigos
     const enemyCount = this.registry.get('enemyCount') || 0;

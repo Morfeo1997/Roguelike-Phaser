@@ -22,6 +22,9 @@ export class GameScene extends Phaser.Scene {
   private isGameOver: boolean = false;
   private gameTimer!: Phaser.Time.TimerEvent;
   private timeRemaining: number = 60;
+  private currentLevel: number = 1;
+  private baseEnemyCount: number = 5; 
+  private baseRangedCount: number = 3;
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -66,6 +69,9 @@ export class GameScene extends Phaser.Scene {
     
     // Crear grupo de enemigos
     this.enemyGroup = this.physics.add.group();
+
+    this.currentLevel = 1;
+    this.registry.set('currentLevel', this.currentLevel);
     
     // Crear enemigos iniciales
     this.createEnemies();
@@ -89,63 +95,148 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createEnemies() {
-    // Crear varios enemigos en posiciones aleatorias
-    const meleeEnemyCount = 5;
-    const enemyCount = 8;
+  // Calcular cantidad de enemigos según el nivel
+  const meleeEnemyCount = this.baseEnemyCount + (this.currentLevel - 1);
+  const rangedEnemyCount = this.baseRangedCount + (this.currentLevel - 1);
+  
+  // Crear enemigos cuerpo a cuerpo
+  for (let i = 0; i < meleeEnemyCount; i++) {
+    let x, y;
+    let validPosition = false;
+    let attempts = 0;
     
-    for (let i = 0; i < meleeEnemyCount; i++) {
-        let x, y;
-        let validPosition = false;
-        let attempts = 0;
-        
-        while (!validPosition && attempts < 20) {
-          x = Phaser.Math.Between(150, 1850);
-          y = Phaser.Math.Between(150, 1350);
-          
-          const distanceToPlayer = Phaser.Math.Distance.Between(x, y, 400, 300);
-          const minDistanceFromEdge = 100;
-          const tooCloseToEdge = 
-            x < minDistanceFromEdge || 
-            x > 2000 - minDistanceFromEdge ||
-            y < minDistanceFromEdge || 
-            y > 1500 - minDistanceFromEdge;
-          if (distanceToPlayer > 150 && !tooCloseToEdge) {
-            validPosition = true;
-          }
-          attempts++;
-        }
+    while (!validPosition && attempts < 20) {
+      x = Phaser.Math.Between(150, 1850);
+      y = Phaser.Math.Between(150, 1350);
       
-      if (validPosition) {
-        const enemy = new Enemy(this, x!, y!, this.player.sprite);
-        this.enemies.push(enemy);
-        this.enemyGroup.add(enemy.getSprite());
+      const distanceToPlayer = Phaser.Math.Distance.Between(x, y, 400, 300);
+      const minDistanceFromEdge = 100;
+      const tooCloseToEdge = 
+        x < minDistanceFromEdge || 
+        x > 2000 - minDistanceFromEdge ||
+        y < minDistanceFromEdge || 
+        y > 1500 - minDistanceFromEdge;
+      
+      if (distanceToPlayer > 150 && !tooCloseToEdge) {
+        validPosition = true;
       }
+      attempts++;
     }
-      const rangedEnemyCount = 3;
     
-    for (let i = 0; i < rangedEnemyCount; i++) {
-      let x, y;
-      let validPosition = false;
-      let attempts = 0;
-      
-      while (!validPosition && attempts < 20) {
-        x = Phaser.Math.Between(100, 1900);
-        y = Phaser.Math.Between(100, 1400);
-        
-        const distanceToPlayer = Phaser.Math.Distance.Between(x, y, 400, 300);
-        if (distanceToPlayer > 200) {
-          validPosition = true;
-        }
-        attempts++;
-      }
-      
-      if (validPosition) {
-        const rangedEnemy = new RangedEnemy(this, x!, y!, this.player.sprite);
-        this.rangedEnemies.push(rangedEnemy);
-        this.enemyGroup.add(rangedEnemy.getSprite());
-      }
+    if (validPosition) {
+      const enemy = new Enemy(this, x!, y!, this.player.sprite);
+      this.enemies.push(enemy);
+      this.enemyGroup.add(enemy.getSprite());
     }
   }
+  
+  // Crear enemigos a distancia
+  for (let i = 0; i < rangedEnemyCount; i++) {
+    let x, y;
+    let validPosition = false;
+    let attempts = 0;
+    
+    while (!validPosition && attempts < 20) {
+      x = Phaser.Math.Between(150, 1850);
+      y = Phaser.Math.Between(150, 1350);
+      
+      const distanceToPlayer = Phaser.Math.Distance.Between(x, y, 400, 300);
+      const minDistanceFromEdge = 100;
+      const tooCloseToEdge = 
+        x < minDistanceFromEdge || 
+        x > 2000 - minDistanceFromEdge ||
+        y < minDistanceFromEdge || 
+        y > 1500 - minDistanceFromEdge;
+      
+      if (distanceToPlayer > 200 && !tooCloseToEdge) {
+        validPosition = true;
+      }
+      attempts++;
+    }
+    
+    if (validPosition) {
+      const rangedEnemy = new RangedEnemy(this, x!, y!, this.player.sprite);
+      this.rangedEnemies.push(rangedEnemy);
+      this.enemyGroup.add(rangedEnemy.getSprite());
+    }
+  }
+}
+
+private showLevelUpNotification() {
+  const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
+  const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
+  
+  // Texto de nivel completado
+  const levelUpText = this.add.text(centerX, centerY, `¡NIVEL ${this.currentLevel}!`, {
+    fontSize: '64px',
+    color: '#fbbf24',
+    fontStyle: 'bold'
+  });
+  levelUpText.setOrigin(0.5);
+  levelUpText.setStroke('#92400e', 6);
+  levelUpText.setShadow(0, 4, '#000000', 10, false, true);
+  levelUpText.setScrollFactor(0);
+  levelUpText.setDepth(999);
+  
+  // Animación de aparición
+  levelUpText.setScale(0);
+  levelUpText.setAlpha(0);
+  
+  this.tweens.add({
+    targets: levelUpText,
+    scale: 1.2,
+    alpha: 1,
+    duration: 300,
+    ease: 'Back.easeOut',
+    onComplete: () => {
+      // Esperar un momento y luego desaparecer
+      this.time.delayedCall(1500, () => {
+        this.tweens.add({
+          targets: levelUpText,
+          scale: 0,
+          alpha: 0,
+          duration: 300,
+          ease: 'Back.easeIn',
+          onComplete: () => {
+            levelUpText.destroy();
+          }
+        });
+      });
+    }
+  });
+  const bonusText = this.add.text(centerX, centerY + 60, '+30 segundos', {
+    fontSize: '24px',
+    color: '#10b981',
+    fontStyle: 'bold'
+  });
+  bonusText.setOrigin(0.5);
+  bonusText.setStroke('#065f46', 3);
+  bonusText.setScrollFactor(0);
+  bonusText.setDepth(999);
+  bonusText.setAlpha(0);
+  
+  this.tweens.add({
+    targets: bonusText,
+    alpha: 1,
+    y: centerY + 80,
+    duration: 300,
+    delay: 200,
+    ease: 'Power2',
+    onComplete: () => {
+      this.time.delayedCall(1500, () => {
+        this.tweens.add({
+          targets: bonusText,
+          alpha: 0,
+          y: centerY + 100,
+          duration: 300,
+          onComplete: () => {
+            bonusText.destroy();
+          }
+        });
+      });
+    }
+  });
+};
 
   private createWorld() {
     const worldWidth = 2000;
@@ -333,6 +424,25 @@ export class GameScene extends Phaser.Scene {
       this.showGameOver('¡Se acabó el tiempo!');
     }
   }
+
+  private levelUp() {
+  this.currentLevel++;
+  this.registry.set('currentLevel', this.currentLevel);
+  
+  // Agregar 30 segundos al tiempo
+  this.timeRemaining += 30;
+  this.registry.set('timeRemaining', this.timeRemaining);
+  
+  // Crear nuevos enemigos
+  this.createEnemies();
+  
+  // Efecto visual de subida de nivel
+  this.showLevelUpNotification();
+  
+  // Efecto de cámara
+  this.cameras.main.shake(200, 0.005);
+  this.cameras.main.flash(300, 255, 215, 0, false); // Flash dorado
+}
 
 
   private createGameOverScreen() {
@@ -544,6 +654,9 @@ export class GameScene extends Phaser.Scene {
   private restartGame() {
     this.isGameOver = false;
     this.gameOverScreen.setVisible(false);
+
+    this.currentLevel = 1;
+    this.registry.set('currentLevel', this.currentLevel);
     
     // Reiniciar temporizador
     this.timeRemaining = 60;
@@ -606,6 +719,11 @@ export class GameScene extends Phaser.Scene {
       this.rangedEnemies.splice(index, 1);
     }
   });
+
+  const totalEnemies = this.enemies.length + this.rangedEnemies.length;
+  if (totalEnemies === 0 && !this.isGameOver) {
+    this.levelUp();
+  }
     
     // Actualizar información en la UI
     this.registry.set('playerPosition', {
