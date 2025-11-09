@@ -9,6 +9,7 @@ export class UIScene extends Phaser.Scene {
   private enemyCountText!: Phaser.GameObjects.Text;
   private healthText!: Phaser.GameObjects.Text;
   private healthHearts!: Phaser.GameObjects.Image[];
+  private timeText!: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'UIScene', active: true });
@@ -48,18 +49,17 @@ export class UIScene extends Phaser.Scene {
     
     
     // Título del juego
-    const timeText = this.add.text(this.cameras.main.width / 2, 30, 'Tiempo: 60', {
+    this.timeText = this.add.text(this.cameras.main.width / 2, 30, 'Tiempo: 60', {
       fontSize: '32px',
       color: '#10b981',
       fontStyle: 'bold'
     });
-    timeText.setOrigin(0.5, 0);
-    timeText.setScrollFactor(0);
-    timeText.setStroke('#065f46', 3);
-    timeText.setShadow(0, 2, '#000000', 6, false, true);
+    this.timeText.setOrigin(0.5, 0);
+    this.timeText.setScrollFactor(0);
+    this.timeText.setStroke('#065f46', 3);
+    this.timeText.setShadow(0, 2, '#000000', 6, false, true);
     
-    // Guardar referencia para actualizar
-    this.registry.set('timeText', timeText);
+    
     
     // Crear barras de cooldown
     this.createCooldownBars();
@@ -159,5 +159,20 @@ export class UIScene extends Phaser.Scene {
     const playerHealth = this.registry.get('playerHealth') || 3;
     const playerMaxHealth = this.registry.get('playerMaxHealth') || 3;
     this.updateHealthDisplay(playerHealth, playerMaxHealth);
+
+    const timeRemaining = this.registry.get('timeRemaining') || 60;
+    this.timeText.setText(`Tiempo: ${timeRemaining}`);
+
+  // Cambiar color según tiempo restante
+  if (timeRemaining <= 10) {
+      this.timeText.setColor('#ef4444'); // Rojo
+      this.timeText.setStroke('#7f1d1d', 3);
+    } else if (timeRemaining <= 30) {
+      this.timeText.setColor('#f59e0b'); // Naranja
+      this.timeText.setStroke('#92400e', 3);
+    } else {
+      this.timeText.setColor('#10b981'); // Verde
+      this.timeText.setStroke('#065f46', 3);
+    }
   }
 }
