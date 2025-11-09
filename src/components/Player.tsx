@@ -22,6 +22,7 @@ export class Player {
   private isDead: boolean = false;
   private attackSound!: Phaser.Sound.BaseSound;
   private damageSound!: Phaser.Sound.BaseSound;
+  private jumpSound!: Phaser.Sound.BaseSound;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
@@ -34,6 +35,7 @@ export class Player {
 
     this.attackSound = this.scene.sound.add('player-attack-sound', { volume: 0.5 });
     this.damageSound = this.scene.sound.add('player-damage-sound', { volume: 0.6 });
+    this.jumpSound = this.scene.sound.add('player-jump-sound', { volume: 0.4 });
     this.sprite.setCollideWorldBounds(true);
     
     // Ajustar tamaño de colisión y visual
@@ -286,6 +288,7 @@ export class Player {
 
     this.isDashing = true;
     this.dashCooldown = 1000;
+    this.jumpSound.play();
 
     // Activar efecto de partículas
     this.dashEffect.setPosition(this.sprite.x, this.sprite.y);

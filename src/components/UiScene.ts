@@ -171,8 +171,8 @@ export class UIScene extends Phaser.Scene {
       this.timeText.setColor('#f59e0b'); // Naranja
       this.timeText.setStroke('#92400e', 3);
     } else {
-      this.timeText.setColor('#10b981'); // Verde
-      this.timeText.setStroke('#065f46', 3);
+      this.timeText.setColor('#0f7facff'); // Verde
+      this.timeText.setStroke('#2a5996', 3);
     }
   }
 }

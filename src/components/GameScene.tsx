@@ -45,6 +45,7 @@ export class GameScene extends Phaser.Scene {
     this.load.audio('player-damage-sound', 'assets/sounds/effects/player-damage.wav');
     this.load.audio('enemy-shoot-sound', 'assets/sounds/effects/enemy-shoot.wav');
     this.load.audio('player-attack-sound', 'assets/sounds/effects/player-attack.wav');
+    this.load.audio('player-jump-sound', 'assets/sounds/effects/player-jump.wav');
 
   }
 
