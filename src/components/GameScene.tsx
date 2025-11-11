@@ -34,6 +34,10 @@ export class GameScene extends Phaser.Scene {
     this.load.image('bg-tile', 'assets/backgrounds/grass-tile.png');
     // Cargar la imagen del jugador desde assets/sprites/player.png
     this.load.image('player-sprite', 'assets/sprites/player.png');
+    this.load.image('player-attack-1', 'assets/sprites/player/player-attack-1.png');
+    this.load.image('player-attack-2', 'assets/sprites/player/player-attack-2.png');
+    this.load.image('player-attack-3', 'assets/sprites/player/player-attack-3.png');
+    this.load.image('player-attack-4', 'assets/sprites/player/player-attack-4.png');
 
     this.load.image('projectile-sprite', 'assets/sprites/projectile.png');
     

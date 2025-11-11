@@ -23,6 +23,14 @@ export class Player {
   private attackSound!: Phaser.Sound.BaseSound;
   private damageSound!: Phaser.Sound.BaseSound;
   private jumpSound!: Phaser.Sound.BaseSound;
+  private attackAnimationFrames: string[] = [
+  'player-attack-1',
+  'player-attack-2', 
+  'player-attack-3',
+  'player-attack-4'
+  ];
+  private currentAttackFrame: number = 0;
+  private attackAnimationSpeed: number = 50;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
@@ -224,6 +232,8 @@ export class Player {
       } else if (dx < 0) {
         this.sprite.setFlipX(true);
       }
+
+      this.playAttackAnimation();
       
       // Posicionar efecto de ataque
       const attackX = this.sprite.x + normalizedX * (this.attackRange * 0.1);
@@ -245,6 +255,7 @@ export class Player {
           this.attackEffect.setVisible(false);
           this.attackEffect.setScale(1);
           this.isAttacking = false;
+          this.sprite.setTexture('player-sprite');
         }
       });
       
@@ -255,6 +266,31 @@ export class Player {
       this.checkEnemyHit(attackX, attackY, enemies, rangedEnemies);
     }
   }
+
+  private playAttackAnimation() {
+  this.currentAttackFrame = 0;
+  
+  // Crear intervalo para cambiar frames
+  const animateAttack = () => {
+    if (this.currentAttackFrame < this.attackAnimationFrames.length) {
+      // Cambiar al siguiente frame
+      this.sprite.setTexture(this.attackAnimationFrames[this.currentAttackFrame]);
+      this.currentAttackFrame++;
+      
+      // Programar siguiente frame
+      this.scene.time.delayedCall(this.attackAnimationSpeed, animateAttack);
+    } else {
+      // Animación completada, volver al sprite original
+      this.sprite.setTexture('player-sprite');
+    }
+  };
+  
+  // Iniciar animación
+  animateAttack();
+}
+
+
+
 
   private checkEnemyHit(attackX: number, attackY: number, enemies: Enemy[], rangedEnemies: RangedEnemy[] = []) {
     enemies.forEach(enemy => {
