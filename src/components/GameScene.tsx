@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Player } from './Player';
 import { Enemy } from './Enemy';
 import { RangedEnemy } from './RangedEnemy';
+import { HealthItem } from './HealthItem';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -25,6 +26,7 @@ export class GameScene extends Phaser.Scene {
   private currentLevel: number = 1;
   private baseEnemyCount: number = 5; 
   private baseRangedCount: number = 3;
+  private healthItems: HealthItem[] = [];
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -40,6 +42,9 @@ export class GameScene extends Phaser.Scene {
     this.load.image('player-attack-4', 'assets/sprites/player/player-attack-4.png');
 
     this.load.image('projectile-sprite', 'assets/sprites/projectile.png');
+
+    this.load.image('heart-red', 'assets/sprites/items/heart.png');
+    this.load.image('heart-golden', 'assets/sprites/items/gold-heart.png');
     
     // Si más adelante quieres agregar otros sprites, puedes hacerlo aquí:
 
@@ -436,6 +441,12 @@ private showLevelUpNotification() {
   // Agregar 30 segundos al tiempo
   this.timeRemaining += 30;
   this.registry.set('timeRemaining', this.timeRemaining);
+
+  this.spawnRedHeart();
+
+  if (this.currentLevel % 3 === 0) {
+    this.spawnGoldenHeart();
+  }
   
   // Crear nuevos enemigos
   this.createEnemies();
@@ -446,6 +457,106 @@ private showLevelUpNotification() {
   // Efecto de cámara
   this.cameras.main.shake(200, 0.005);
   this.cameras.main.flash(300, 255, 215, 0, false); // Flash dorado
+}
+
+private spawnRedHeart() {
+  // Posición aleatoria cerca del jugador pero no muy cerca
+  let x, y;
+  let validPosition = false;
+  let attempts = 0;
+  
+  while (!validPosition && attempts < 20) {
+    const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+    const distance = Phaser.Math.Between(100, 200);
+    
+    x = this.player.sprite.x + Math.cos(angle) * distance;
+    y = this.player.sprite.y + Math.sin(angle) * distance;
+    
+    // Verificar que esté dentro de los límites del mundo
+    if (x > 50 && x < 1950 && y > 50 && y < 1450) {
+      validPosition = true;
+    }
+    attempts++;
+  }
+  
+  if (validPosition) {
+    const heartItem = new HealthItem(this, x!, y!, 'red');
+    this.healthItems.push(heartItem);
+  }
+}
+
+private spawnGoldenHeart() {
+  // Posición aleatoria en el centro de la pantalla visible
+  const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
+  const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
+  
+  const offsetX = Phaser.Math.Between(-100, 100);
+  const offsetY = Phaser.Math.Between(-100, 100);
+  
+  const heartItem = new HealthItem(this, centerX + offsetX, centerY + offsetY, 'golden');
+  this.healthItems.push(heartItem);
+  
+  // Efecto especial para corazón dorado
+  this.cameras.main.flash(500, 255, 215, 0, false);
+}
+
+private checkHealthItemCollisions() {
+  this.healthItems.forEach((item, index) => {
+    if (item.isItemCollected()) return;
+    
+    const distance = Phaser.Math.Distance.Between(
+      this.player.sprite.x,
+      this.player.sprite.y,
+      item.getSprite().x,
+      item.getSprite().y
+    );
+    
+    if (distance < 30) {
+      const type = item.collect();
+      
+      if (type === 'red') {
+        // Aumentar vida máxima en 1
+        this.player.increaseMaxHealth(1);
+        this.showHealthNotification('+1 Vida Máxima', 0xef4444);
+      } else if (type === 'golden') {
+        // Restaurar vida completa
+        this.player.healToMax();
+        this.showHealthNotification('¡Vida Restaurada!', 0xffd700);
+      }
+      
+      // Remover del array después de un delay
+      this.time.delayedCall(500, () => {
+        this.healthItems.splice(index, 1);
+      });
+    }
+  });
+}
+
+private showHealthNotification(message: string, color: number) {
+  const notifText = this.add.text(
+    this.player.sprite.x,
+    this.player.sprite.y - 40,
+    message,
+    {
+      fontSize: '20px',
+      color: `#${color.toString(16).padStart(6, '0')}`,
+      fontStyle: 'bold'
+    }
+  );
+  notifText.setOrigin(0.5);
+  notifText.setStroke('#000000', 4);
+  
+  // Animación de flotación y desvanecimiento
+  this.tweens.add({
+    targets: notifText,
+    y: notifText.y - 50,
+    alpha: 0,
+    duration: 1000,
+    ease: 'Power2',
+    onComplete: () => {
+      notifText.destroy();
+    }
+  });
 }
 
 
@@ -691,6 +802,9 @@ private showLevelUpNotification() {
     this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length);
     this.registry.set('attackCooldown', 0);
     this.registry.set('dashCooldown', 0);
+
+    this.healthItems.forEach(item => item.destroy());
+    this.healthItems = [];
   }
 
   update() {
@@ -745,6 +859,8 @@ private showLevelUpNotification() {
     // Actualizar información de salud del jugador
     this.registry.set('playerHealth', this.player.getHealth());
     this.registry.set('playerMaxHealth', this.player.getMaxHealth());
+
+    this.checkHealthItemCollisions();
   }
 
   private getInputVector(): { x: number; y: number } {

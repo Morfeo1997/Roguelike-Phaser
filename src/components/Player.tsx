@@ -153,6 +153,42 @@ export class Player {
     });
   }
 
+  public increaseMaxHealth(amount: number) {
+  this.maxHealth += amount;
+  this.health += amount; // También aumentar la vida actual
+  
+  // Efecto visual
+  this.scene.cameras.main.flash(200, 255, 100, 100, false);
+  }
+
+  public healToMax() {
+    this.health = this.maxHealth;
+    
+    // Efecto visual de curación
+    this.scene.cameras.main.flash(300, 255, 215, 0, false);
+    
+    // Efecto de partículas curativas
+    const healEffect = this.scene.add.particles(
+      this.sprite.x,
+      this.sprite.y,
+      'player-sprite',
+      {
+        scale: { start: 0.3, end: 0 },
+        speed: { min: 50, max: 100 },
+        lifespan: 800,
+        quantity: 15,
+        tint: 0xffd700,
+        alpha: { start: 1, end: 0 }
+      }
+    );
+    
+    this.scene.time.delayedCall(800, () => {
+      healEffect.destroy();
+    });
+  }
+
+
+
   public update(inputVector: { x: number; y: number }) {
     // Actualizar cooldowns
     if (this.attackCooldown > 0) {
