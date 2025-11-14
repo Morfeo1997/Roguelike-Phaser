@@ -26,8 +26,7 @@ export class Player {
   private attackAnimationFrames: string[] = [
   'player-attack-1',
   'player-attack-2', 
-  'player-attack-3',
-  'player-attack-4'
+  'player-attack-3'
   ];
   private currentAttackFrame: number = 0;
   private attackAnimationSpeed: number = 50;
