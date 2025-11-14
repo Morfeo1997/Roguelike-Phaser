@@ -35,21 +35,21 @@ export class GameScene extends Phaser.Scene {
   preload() {
     this.load.image('bg-tile', 'assets/backgrounds/grass-tile.png');
     // Cargar la imagen del jugador desde assets/sprites/player.png
-    this.load.image('player-sprite', 'assets/sprites/player.png');
+    this.load.image('player-sprite', 'assets/sprites/player/player.png');
     this.load.image('player-attack-1', 'assets/sprites/player/player-attack-1.png');
     this.load.image('player-attack-2', 'assets/sprites/player/player-attack-2.png');
     this.load.image('player-attack-3', 'assets/sprites/player/player-attack-3.png');
     this.load.image('player-attack-4', 'assets/sprites/player/player-attack-4.png');
 
-    this.load.image('projectile-sprite', 'assets/sprites/projectile.png');
+    this.load.image('projectile-sprite', 'assets/sprites/enemies/projectile.png');
 
     this.load.image('heart-red', 'assets/sprites/items/heart.png');
     this.load.image('heart-golden', 'assets/sprites/items/gold-heart.png');
     
     // Si más adelante quieres agregar otros sprites, puedes hacerlo aquí:
 
-    this.load.image('enemy-melee-sprite', 'assets/sprites/enemy-melee.png');
-    this.load.image('enemy-ranged-sprite', 'assets/sprites/enemy-ranged.png');
+    this.load.image('enemy-melee-sprite', 'assets/sprites/enemies/enemy-melee.png');
+    this.load.image('enemy-ranged-sprite', 'assets/sprites/enemies/enemy-ranged.png');
 
     this.load.image('tree-sprite', 'assets/sprites/tree.png');
     this.load.image('rock-sprite', 'assets/sprites/rock.png');
