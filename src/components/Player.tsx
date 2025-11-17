@@ -30,6 +30,10 @@ export class Player {
   ];
   private currentAttackFrame: number = 0;
   private attackAnimationSpeed: number = 50;
+  private walkAnimationSpeed: number = 200; // Tiempo entre cambios (200ms)
+  private walkAnimationTimer?: Phaser.Time.TimerEvent;
+  private isWalking: boolean = false;
+  private isWalkFrameAlternate: boolean = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
@@ -141,12 +145,13 @@ export class Player {
       this.dashCooldown -= this.scene.game.loop.delta;
     }
 
+    const isMoving = (inputVector.x !== 0 || inputVector.y !== 0);
     // Aplicar movimiento
-    if ((inputVector.x !== 0 || inputVector.y !== 0) && !this.isAttacking && !this.isDashing) {
-      this.sprite.setVelocity(
-        inputVector.x * this.moveSpeed,
-        inputVector.y * this.moveSpeed
-      );
+    if (isMoving && !this.isAttacking && !this.isDashing) {
+    this.sprite.setVelocity(
+      inputVector.x * this.moveSpeed,
+      inputVector.y * this.moveSpeed
+    );
       
       // Activar partículas cuando se mueve
       this.particles.setVisible(true);
@@ -157,10 +162,17 @@ export class Player {
       } else if (inputVector.x < 0) {
         this.sprite.setFlipX(true);
       }
+
+    if (!this.isWalking) {
+      this.startWalkAnimation();
+    }
       
     } else if (!this.isAttacking && !this.isDashing) {
       // Desactivar partículas cuando está quieto
       this.particles.setVisible(false);
+      if (this.isWalking) {
+      this.stopWalkAnimation();
+      }
     }
     
     // Efecto de escala durante estados especiales
@@ -189,11 +201,63 @@ export class Player {
     }
   }
 
+  private startWalkAnimation() {
+  this.isWalking = true;
+  this.isWalkFrameAlternate = false;
+  
+  // Detener cualquier animación previa
+  if (this.walkAnimationTimer) {
+    this.walkAnimationTimer.remove();
+  }
+  
+  // Crear timer que alterna entre los dos sprites
+  this.walkAnimationTimer = this.scene.time.addEvent({
+    delay: this.walkAnimationSpeed,
+    callback: this.toggleWalkFrame,
+    callbackScope: this,
+    loop: true
+  });
+  
+  // Mostrar sprite base inicialmente
+  this.sprite.setTexture('player-sprite');
+}
+
+private toggleWalkFrame() {
+  if (!this.isWalking) return;
+  
+  // Alternar entre sprite base y sprite de movimiento
+  if (this.isWalkFrameAlternate) {
+    this.sprite.setTexture('player-sprite');
+  } else {
+    this.sprite.setTexture('player-walk');
+  }
+  
+  // Cambiar el estado
+  this.isWalkFrameAlternate = !this.isWalkFrameAlternate;
+}
+
+private stopWalkAnimation() {
+  this.isWalking = false;
+  
+  // Detener el timer
+  if (this.walkAnimationTimer) {
+    this.walkAnimationTimer.remove();
+    this.walkAnimationTimer = undefined;
+  }
+  
+  // Volver al sprite base
+  this.sprite.setTexture('player-sprite');
+  this.isWalkFrameAlternate = false;
+}
+
   public attack(targetX: number, targetY: number, enemies: Enemy[], rangedEnemies: RangedEnemy[] = []) {
     if (this.attackCooldown > 0 || this.isAttacking) return;
 
     this.isAttacking = true;
     this.attackCooldown = 500;
+    if (this.isWalking) {
+    this.stopWalkAnimation();
+    }
     this.attackSound.play();
 
     // Calcular dirección del ataque
@@ -303,7 +367,13 @@ export class Player {
 
     this.isDashing = true;
     this.dashCooldown = 1000;
+
+    if (this.isWalking) {
+    this.stopWalkAnimation();
+    }
     this.jumpSound.play();
+
+
 
     // Activar efecto de partículas
     this.dashEffect.setPosition(this.sprite.x, this.sprite.y);
@@ -421,6 +491,10 @@ export class Player {
     this.isAttacking = false;
     this.isDashing = false;
     this.lastDamageTime = 0;
+
+    if (this.isWalking) {
+    this.stopWalkAnimation();
+    }
     
     this.sprite.setPosition(x, y);
     this.sprite.setScale(1);
