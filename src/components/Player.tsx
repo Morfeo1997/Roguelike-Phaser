@@ -61,63 +61,7 @@ export class Player {
     this.createDashEffect();
   }
 
-  private createAnimations() {
-    // Solo crear animaciones si no existen ya
-    if (!this.scene.anims.exists('player-idle')) {
-      // Animación de idle (reposo)
-      this.scene.anims.create({
-        key: 'player-idle',
-        frames: this.scene.anims.generateFrameNumbers('player-spritesheet', { 
-          start: 0, 
-          end: 3 
-        }),
-        frameRate: 4,
-        repeat: -1
-      });
-    }
-
-    if (!this.scene.anims.exists('player-walk')) {
-      // Animación de caminar
-      this.scene.anims.create({
-        key: 'player-walk',
-        frames: this.scene.anims.generateFrameNumbers('player-spritesheet', { 
-          start: 4, 
-          end: 7 
-        }),
-        frameRate: 8,
-        repeat: -1
-      });
-    }
-
-    if (!this.scene.anims.exists('player-attack')) {
-      // Animación de ataque
-      this.scene.anims.create({
-        key: 'player-attack',
-        frames: this.scene.anims.generateFrameNumbers('player-spritesheet', { 
-          start: 8, 
-          end: 11 
-        }),
-        frameRate: 12,
-        repeat: 0 // No repetir, solo una vez
-      });
-    }
-
-    if (!this.scene.anims.exists('player-dash')) {
-      // Animación de dash
-      this.scene.anims.create({
-        key: 'player-dash',
-        frames: this.scene.anims.generateFrameNumbers('player-spritesheet', { 
-          start: 12, 
-          end: 15 
-        }),
-        frameRate: 10,
-        repeat: 0
-      });
-    }
-
-    // Iniciar con animación idle
-    this.sprite.play('player-idle');
-  }
+  
 
   private createParticleEffect() {
     // Para las partículas, usamos la misma textura del jugador
