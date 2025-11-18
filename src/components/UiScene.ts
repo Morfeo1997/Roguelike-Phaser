@@ -20,8 +20,8 @@ export class UIScene extends Phaser.Scene {
 
   preload() {
     // NUEVO: Cargar sprites de corazones (si no están ya en GameScene)
-    this.load.image('heart-full', 'assets/sprites/items/heart.png');
-    this.load.image('heart-empty', 'assets/sprites/items/heart-empty.png');
+    this.load.image('heart-full', 'assets/sprites/items/ui-heart.png');
+    this.load.image('heart-empty', 'assets/sprites/items/ui-empty-heart.png');
     // O si solo tienes un corazón, lo usaremos con transparencia
   }
 
@@ -206,24 +206,17 @@ export class UIScene extends Phaser.Scene {
           // Corazón lleno
           heart.setTexture('heart-full');
           heart.setAlpha(1);
-          heart.setTint(0xffffff); // Sin tinte (color original)
+          heart.setTint(0xffffff);
           
           // Efecto de pulsación en corazones llenos
           const time = this.time.now * 0.002;
           const scale = 1 + Math.sin(time + index * 0.5) * 0.05;
           heart.setScale(scale);
         } else {
-          // Corazón vacío
-          // Opción 1: Si tienes sprite de corazón vacío
           heart.setTexture('heart-empty');
           heart.setAlpha(0.5);
           heart.setScale(1);
           
-          // Opción 2: Si solo tienes un sprite, usar tinte gris
-          // heart.setTexture('heart-full');
-          // heart.setTint(0x64748b);
-          // heart.setAlpha(0.4);
-          // heart.setScale(1);
         }
       } else {
         // Este corazón no debe mostrarse (más allá de la vida máxima)
