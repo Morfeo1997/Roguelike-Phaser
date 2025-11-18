@@ -7,12 +7,22 @@ export class UIScene extends Phaser.Scene {
   private attackCooldownBg!: Phaser.GameObjects.Rectangle;
   private dashCooldownBg!: Phaser.GameObjects.Rectangle;
   private enemyCountText!: Phaser.GameObjects.Text;
+  private attackCooldownBorder!: Phaser.GameObjects.Rectangle;
+  private dashCooldownBorder!: Phaser.GameObjects.Rectangle;
   private healthText!: Phaser.GameObjects.Text;
   private healthHearts!: Phaser.GameObjects.Image[];
   private timeText!: Phaser.GameObjects.Text;
+  
 
   constructor() {
     super({ key: 'UIScene', active: true });
+  }
+
+  preload() {
+    // NUEVO: Cargar sprites de corazones (si no están ya en GameScene)
+    this.load.image('heart-full', 'assets/sprites/items/heart.png');
+    this.load.image('heart-empty', 'assets/sprites/items/heart-empty.png');
+    // O si solo tienes un corazón, lo usaremos con transparencia
   }
 
   create() {
@@ -35,13 +45,16 @@ export class UIScene extends Phaser.Scene {
       padding: { left: 8, right: 8, top: 4, bottom: 4 }
     });
     this.enemyCountText.setScrollFactor(0);
+
+    this.createHealthHearts();
     
     // Indicador de vida del jugador
     this.healthText = this.add.text(16, 84, 'Vida:', {
       fontSize: '16px',
       color: '#ef4444',
       backgroundColor: 'rgba(15, 23, 42, 0.8)',
-      padding: { left: 8, right: 8, top: 4, bottom: 4 }
+      padding: { left: 8, right: 8, top: 4, bottom: 4 },
+
     });
     this.healthText.setScrollFactor(0);
     
@@ -69,15 +82,45 @@ export class UIScene extends Phaser.Scene {
 
   private createCooldownBars() {
     const barWidth = 120;
-    const barHeight = 8;
+    const barHeight = 12; // Un poco más altas
     const startX = this.cameras.main.width - barWidth - 20;
     const startY = 20;
+    const borderWidth = 2;
     
     // Barra de cooldown de ataque
     this.add.text(startX, startY - 20, 'Ataque', {
-      fontSize: '12px',
-      color: '#e2e8f0'
+      fontSize: '14px',
+      color: '#e2e8f0',
+      fontStyle: 'bold'
     }).setScrollFactor(0);
+
+    this.attackCooldownBorder = this.add.rectangle(
+      startX + barWidth / 2, 
+      startY, 
+      barWidth + borderWidth * 2, 
+      barHeight + borderWidth * 2, 
+      0xffffff
+    );
+    this.attackCooldownBorder.setScrollFactor(0);
+
+    this.attackCooldownBg = this.add.rectangle(
+      startX + barWidth / 2, 
+      startY, 
+      barWidth, 
+      barHeight, 
+      0x1e293b
+    );
+    this.attackCooldownBg.setScrollFactor(0);
+
+    this.attackCooldownBar = this.add.rectangle(
+      startX, 
+      startY, 
+      0, 
+      barHeight, 
+      0xff4444
+    );
+    this.attackCooldownBar.setOrigin(0, 0.5);
+    this.attackCooldownBar.setScrollFactor(0);
     
     this.attackCooldownBg = this.add.rectangle(startX + barWidth/2, startY, barWidth, barHeight, 0x334155);
     this.attackCooldownBg.setScrollFactor(0);
@@ -87,10 +130,39 @@ export class UIScene extends Phaser.Scene {
     this.attackCooldownBar.setScrollFactor(0);
     
     // Barra de cooldown de dash
-    this.add.text(startX, startY + 40, 'Salto', {
-      fontSize: '12px',
-      color: '#e2e8f0'
+    this.add.text(startX, startY + 50, 'Salto', {
+      fontSize: '14px',
+      color: '#e2e8f0',
+      fontStyle: 'bold'
     }).setScrollFactor(0);
+
+    this.dashCooldownBorder = this.add.rectangle(
+      startX + barWidth / 2, 
+      startY + 70, 
+      barWidth + borderWidth * 2, 
+      barHeight + borderWidth * 2, 
+      0xffffff
+    );
+    this.dashCooldownBorder.setScrollFactor(0);
+
+    this.dashCooldownBg = this.add.rectangle(
+      startX + barWidth / 2, 
+      startY + 70, 
+      barWidth, 
+      barHeight, 
+      0x1e293b
+    );
+    this.dashCooldownBg.setScrollFactor(0);
+
+    this.dashCooldownBar = this.add.rectangle(
+      startX, 
+      startY + 70, 
+      0, 
+      barHeight, 
+      0x00ff88
+    );
+    this.dashCooldownBar.setOrigin(0, 0.5);
+    this.dashCooldownBar.setScrollFactor(0);
     
     this.dashCooldownBg = this.add.rectangle(startX + barWidth/2, startY + 60, barWidth, barHeight, 0x334155);
     this.dashCooldownBg.setScrollFactor(0);
@@ -102,33 +174,60 @@ export class UIScene extends Phaser.Scene {
 
   private createHealthHearts() {
     this.healthHearts = [];
+
+    const startX = 16;
+    const startY = 94;
+    const heartSize = 24; // Tamaño de cada corazón
+    const spacing = 30;
     
     // Crear textura de corazón
-    const graphics = this.add.graphics();
-    graphics.fillStyle(0xef4444);
-    graphics.fillCircle(6, 8, 4);
-    graphics.fillCircle(14, 8, 4);
-    graphics.fillTriangle(2, 12, 18, 12, 10, 20);
-    graphics.generateTexture('heart', 20, 24);
-    graphics.destroy();
-    
-    // Crear corazones individuales
-    for (let i = 0; i < 3; i++) {
-      const heart = this.add.image(90 + (i * 25), 94, 'heart');
+    for (let i = 0; i < 10; i++) {
+      // NUEVO: Usar imagen de corazón en lugar de gráfico generado
+      const heart = this.add.image(
+        startX + (i * spacing), 
+        startY, 
+        'heart-full'
+      );
       heart.setScrollFactor(0);
-      heart.setScale(0.8);
+      heart.setDisplaySize(heartSize, heartSize);
+      heart.setOrigin(0, 0.5);
+      heart.setVisible(false); // Ocultar por defecto
       this.healthHearts.push(heart);
     }
   }
 
   private updateHealthDisplay(currentHealth: number, maxHealth: number) {
     this.healthHearts.forEach((heart, index) => {
-      if (index < currentHealth) {
-        heart.setAlpha(1);
-        heart.setTint(0xef4444);
+      if (index < maxHealth) {
+        // Este corazón debe ser visible
+        heart.setVisible(true);
+        
+        if (index < currentHealth) {
+          // Corazón lleno
+          heart.setTexture('heart-full');
+          heart.setAlpha(1);
+          heart.setTint(0xffffff); // Sin tinte (color original)
+          
+          // Efecto de pulsación en corazones llenos
+          const time = this.time.now * 0.002;
+          const scale = 1 + Math.sin(time + index * 0.5) * 0.05;
+          heart.setScale(scale);
+        } else {
+          // Corazón vacío
+          // Opción 1: Si tienes sprite de corazón vacío
+          heart.setTexture('heart-empty');
+          heart.setAlpha(0.5);
+          heart.setScale(1);
+          
+          // Opción 2: Si solo tienes un sprite, usar tinte gris
+          // heart.setTexture('heart-full');
+          // heart.setTint(0x64748b);
+          // heart.setAlpha(0.4);
+          // heart.setScale(1);
+        }
       } else {
-        heart.setAlpha(0.3);
-        heart.setTint(0x64748b);
+        // Este corazón no debe mostrarse (más allá de la vida máxima)
+        heart.setVisible(false);
       }
     });
   }
@@ -154,6 +253,16 @@ export class UIScene extends Phaser.Scene {
     
     this.attackCooldownBar.width = (1 - attackCooldown) * 120;
     this.dashCooldownBar.width = (1 - dashCooldown) * 120;
+
+    if (attackCooldown === 0) {
+      this.attackCooldownBar.setAlpha(1);
+      // Efecto de pulso
+      const pulse = 0.8 + Math.sin(this.time.now * 0.01) * 0.2;
+      this.attackCooldownBorder.setAlpha(pulse);
+    } else {
+      this.attackCooldownBar.setAlpha(0.8);
+      this.attackCooldownBorder.setAlpha(1);
+    }
     
     // Actualizar display de vida
     const playerHealth = this.registry.get('playerHealth') || 3;

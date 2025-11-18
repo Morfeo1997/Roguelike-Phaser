@@ -22,7 +22,7 @@ export class GameScene extends Phaser.Scene {
   private gameOverScreen!: Phaser.GameObjects.Container;
   private isGameOver: boolean = false;
   private gameTimer!: Phaser.Time.TimerEvent;
-  private timeRemaining: number = 60;
+  private timeRemaining: number = 120;
   private currentLevel: number = 1;
   private baseEnemyCount: number = 5; 
   private baseRangedCount: number = 3;
