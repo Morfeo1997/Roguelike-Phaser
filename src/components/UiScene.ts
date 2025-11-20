@@ -49,10 +49,9 @@ export class UIScene extends Phaser.Scene {
     this.createHealthHearts();
     
     // Indicador de vida del jugador
-    this.healthText = this.add.text(16, 84, 'Vida:', {
+    this.healthText = this.add.text(16, 84, '', {
       fontSize: '16px',
       color: '#ef4444',
-      backgroundColor: 'rgba(15, 23, 42, 0.8)',
       padding: { left: 8, right: 8, top: 4, bottom: 4 },
 
     });
@@ -64,7 +63,7 @@ export class UIScene extends Phaser.Scene {
     
     
     // Título del juego
-    this.timeText = this.add.text(this.cameras.main.width / 2, 30, 'Tiempo: 60', {
+    this.timeText = this.add.text(this.cameras.main.width / 2, 30, 'Tiempo: 120', {
       fontSize: '32px',
       color: '#10b981',
       fontStyle: 'bold'
@@ -84,12 +83,12 @@ export class UIScene extends Phaser.Scene {
     const barWidth = 120;
     const barHeight = 12; // Un poco más altas
     const startX = this.cameras.main.width - barWidth - 20;
-    const startY = 20;
+    const startY = 25;
     const borderWidth = 2;
     
     // Barra de cooldown de ataque
     this.add.text(startX, startY - 20, 'Ataque', {
-      fontSize: '14px',
+      fontSize: '12px',
       color: '#e2e8f0',
       fontStyle: 'bold'
     }).setScrollFactor(0);
@@ -130,15 +129,15 @@ export class UIScene extends Phaser.Scene {
     this.attackCooldownBar.setScrollFactor(0);
     
     // Barra de cooldown de dash
-    this.add.text(startX, startY + 50, 'Salto', {
-      fontSize: '14px',
+    this.add.text(startX, startY + 30, 'Salto', {
+      fontSize: '12px',
       color: '#e2e8f0',
       fontStyle: 'bold'
     }).setScrollFactor(0);
 
     this.dashCooldownBorder = this.add.rectangle(
       startX + barWidth / 2, 
-      startY + 70, 
+      startY + 50, 
       barWidth + borderWidth * 2, 
       barHeight + borderWidth * 2, 
       0xffffff
@@ -147,7 +146,7 @@ export class UIScene extends Phaser.Scene {
 
     this.dashCooldownBg = this.add.rectangle(
       startX + barWidth / 2, 
-      startY + 70, 
+      startY + 50, 
       barWidth, 
       barHeight, 
       0x1e293b
@@ -164,11 +163,10 @@ export class UIScene extends Phaser.Scene {
     this.dashCooldownBar.setOrigin(0, 0.5);
     this.dashCooldownBar.setScrollFactor(0);
     
-    this.dashCooldownBg = this.add.rectangle(startX + barWidth/2, startY + 60, barWidth, barHeight, 0x334155);
-    this.dashCooldownBg.setScrollFactor(0);
+    
     
     this.dashCooldownBar = this.add.rectangle(startX, startY + 60, 0, barHeight, 0x00ff88);
-    this.dashCooldownBar.setOrigin(0, 0.5);
+    this.dashCooldownBar.setOrigin(0, 1.32);
     this.dashCooldownBar.setScrollFactor(0);
   }
 
