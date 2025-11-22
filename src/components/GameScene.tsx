@@ -6,6 +6,7 @@ import { HealthItem } from './HealthItem';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
+  private backgroundMusic!: Phaser.Sound.BaseSound;
   private enemies: Enemy[] = [];
   private enemyGroup!: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -53,6 +54,7 @@ export class GameScene extends Phaser.Scene {
 
     this.load.image('tree-sprite', 'assets/sprites/tree.png');
     this.load.image('rock-sprite', 'assets/sprites/rock.png');
+    this.load.audio('background-music', 'assets/sounds/music/bg-music.wav');
     this.load.audio('enemy-damage-sound', 'assets/sounds/effects/enemy-damage.wav');
     this.load.audio('player-damage-sound', 'assets/sounds/effects/player-damage.wav');
     this.load.audio('enemy-shoot-sound', 'assets/sounds/effects/enemy-shoot.wav');
@@ -81,6 +83,13 @@ export class GameScene extends Phaser.Scene {
 
     this.currentLevel = 1;
     this.registry.set('currentLevel', this.currentLevel);
+
+    this.backgroundMusic = this.sound.add('background-music', {
+    volume: 0.3,    // Volumen de la música (30%)
+    loop: true      // Repetir infinitamente
+    });
+
+    this.backgroundMusic.play();
     
     // Crear enemigos iniciales
     this.createEnemies();
