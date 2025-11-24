@@ -9,11 +9,8 @@ function App() {
       <header className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50">
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold text-white text-center">
-            Juego 2D Vista Cenital
+            Chrono-Blade Ascent
           </h1>
-          <p className="text-slate-300 text-center mt-2">
-            Construido con Phaser.js, React y TypeScript
-          </p>
         </div>
       </header>
 
