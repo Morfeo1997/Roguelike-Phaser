@@ -260,7 +260,7 @@ export class UIScene extends Phaser.Scene {
     const playerMaxHealth = this.registry.get('playerMaxHealth') || 3;
     this.updateHealthDisplay(playerHealth, playerMaxHealth);
 
-    const timeRemaining = this.registry.get('timeRemaining') || 60;
+    const timeRemaining = this.registry.get('timeRemaining') || 120;
     this.timeText.setText(`Tiempo: ${timeRemaining}`);
 
   // Cambiar color según tiempo restante

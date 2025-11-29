@@ -181,8 +181,8 @@ export class GameScene extends Phaser.Scene {
 }
 
 private showLevelUpNotification() {
-  const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
-  const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
+  const centerX = this.cameras.main.width / 2;
+  const centerY = this.cameras.main.height / 2;
   
   // Texto de nivel completado
   const levelUpText = this.add.text(centerX, centerY, `¡NIVEL ${this.currentLevel}!`, {
