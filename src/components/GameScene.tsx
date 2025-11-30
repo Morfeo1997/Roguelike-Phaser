@@ -186,7 +186,7 @@ private showLevelUpNotification() {
   
   // Texto de nivel completado
   const levelUpText = this.add.text(centerX, centerY, `¡NIVEL ${this.currentLevel}!`, {
-    fontSize: '64px',
+    fontSize: '24px',
     color: '#fbbf24',
     fontStyle: 'bold'
   });
@@ -419,7 +419,7 @@ private showLevelUpNotification() {
 
   private startGameTimer() {
     // Inicializar tiempo restante
-    this.timeRemaining = 60;
+    this.timeRemaining = 120;
     this.registry.set('timeRemaining', this.timeRemaining);
     
     // Crear evento de temporizador que se ejecuta cada segundo
