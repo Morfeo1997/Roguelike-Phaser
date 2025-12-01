@@ -17,8 +17,9 @@ function App() {
       {/* Game Container */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <GameContainer width={800} height={600} />
-          
+          <div className='border-4 border-gray-500 rounded-sm w-full'>
+            <GameContainer width={800} height={600} />
+          </div>
           {/* Game Info */}
           <div className="mt-8 bg-slate-800/30 backdrop-blur-sm rounded-lg border border-slate-700/50 p-6">
             <div className="flex items-start gap-3">
