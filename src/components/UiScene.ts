@@ -12,6 +12,7 @@ export class UIScene extends Phaser.Scene {
   private healthText!: Phaser.GameObjects.Text;
   private healthHearts!: Phaser.GameObjects.Image[];
   private timeText!: Phaser.GameObjects.Text;
+  private scoreText!: Phaser.GameObjects.Text;
   
 
   constructor() {
@@ -36,6 +37,21 @@ export class UIScene extends Phaser.Scene {
     });
     this.levelText.setScrollFactor(0);
     this.levelText.setStroke('#92400e', 2);
+
+    this.scoreText = this.add.text(
+    this.cameras.main.width / 2, 
+    5, 
+    'Puntos: 0',
+    {
+      fontSize: '24px',
+      color: '#fbbf24',
+      fontStyle: 'bold'
+    }
+    );
+    this.scoreText.setOrigin(0.5, 0);
+    this.scoreText.setScrollFactor(0);
+    this.scoreText.setStroke('#92400e', 3);
+    this.scoreText.setShadow(0, 2, '#000000', 4, false, true);
     
     // Contador de enemigos
     this.enemyCountText = this.add.text(16, 50, 'Enemigos: 8', {
@@ -237,6 +253,11 @@ export class UIScene extends Phaser.Scene {
       this.enemyCountText.setText(`Enemigos: ${enemyCount}`);
       this.enemyCountText.setColor('#ef4444');
     }
+
+    const score = this.registry.get('score') || 0;
+    this.scoreText.setText(`Puntos: ${score.toLocaleString()}`);
+
+    
     
     // Actualizar barras de cooldown
     const attackCooldown = this.registry.get('attackCooldown') || 0;

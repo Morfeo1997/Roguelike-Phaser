@@ -28,6 +28,8 @@ export class GameScene extends Phaser.Scene {
   private baseEnemyCount: number = 5; 
   private baseRangedCount: number = 3;
   private healthItems: HealthItem[] = [];
+  private score: number = 0;
+  private basePointsPerEnemy: number = 10;
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -83,6 +85,8 @@ export class GameScene extends Phaser.Scene {
 
     this.currentLevel = 1;
     this.registry.set('currentLevel', this.currentLevel);
+    this.score = 0;
+    this.registry.set('score', this.score);
 
     this.backgroundMusic = this.sound.add('background-music', {
     volume: 0.3,    // Volumen de la música (30%)
@@ -255,6 +259,58 @@ private showLevelUpNotification() {
     }
   });
 };
+  private getPointsForEnemy(): number {
+    // Fórmula: 10 × 2^(nivel-1)
+    // Nivel 1: 10 × 2^0 = 10 puntos
+    // Nivel 2: 10 × 2^1 = 20 puntos
+    // Nivel 3: 10 × 2^2 = 40 puntos
+    // Nivel 4: 10 × 2^3 = 80 puntos
+    return this.basePointsPerEnemy * Math.pow(2, this.currentLevel - 1);
+  }
+
+  private showScorePopup(points: number) {
+  // Obtener posición del último enemigo derrotado (aprox. centro de pantalla)
+  const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
+  const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
+  
+  const scoreText = this.add.text(
+    centerX,
+    centerY - 100,
+    `+${points}`,
+    {
+      fontSize: '32px',
+      color: '#fbbf24',
+      fontStyle: 'bold'
+    }
+  );
+  scoreText.setOrigin(0.5);
+  scoreText.setStroke('#92400e', 4);
+  scoreText.setShadow(0, 2, '#000000', 6, false, true);
+  scoreText.setScrollFactor(0);
+  scoreText.setDepth(999);
+  
+  // Animación de flotación
+  this.tweens.add({
+    targets: scoreText,
+    y: centerY - 150,
+    alpha: 0,
+    scale: 1.5,
+    duration: 1000,
+    ease: 'Power2',
+    onComplete: () => {
+      scoreText.destroy();
+    }
+  });
+}
+
+  private addScore(points: number) {
+  this.score += points;
+  this.registry.set('score', this.score);
+  
+  // Efecto visual de puntos ganados
+  this.showScorePopup(points);
+}
+
 
   private createWorld() {
     const worldWidth = 2000;
@@ -781,6 +837,9 @@ private showHealthNotification(message: string, color: number) {
 
     this.currentLevel = 1;
     this.registry.set('currentLevel', this.currentLevel);
+
+    this.score = 0;
+    this.registry.set('score', this.score);
     
     // Reiniciar temporizador
     this.timeRemaining = 60;
@@ -833,6 +892,8 @@ private showHealthNotification(message: string, color: number) {
       if (enemy.isEnemyAlive()) {
         enemy.update();
       } else {
+        const points = this.getPointsForEnemy();
+        this.addScore(points);
         // Remover enemigos muertos del array
         this.enemies.splice(index, 1);
       }
@@ -843,6 +904,8 @@ private showHealthNotification(message: string, color: number) {
       enemy.update();
       enemy.checkProjectileHits(this.player.sprite);
     } else {
+      const points = this.getPointsForEnemy();
+      this.addScore(points);
       this.rangedEnemies.splice(index, 1);
     }
   });
