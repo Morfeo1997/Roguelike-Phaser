@@ -751,6 +751,20 @@ private showHealthNotification(message: string, color: number) {
   gameOverText.setStroke('#7f1d1d', 4);
   gameOverText.setShadow(0, 4, '#000000', 8, false, true);
   this.gameOverScreen.add(gameOverText);
+
+  const finalScoreText = this.add.text(
+    playerX, 
+    playerY - 50, 
+    `Puntuación Final: ${this.score.toLocaleString()}`,
+    {
+      fontSize: '24px',
+      color: '#fbbf24',
+      fontStyle: 'bold'
+    }
+  );
+  finalScoreText.setOrigin(0.5);
+  finalScoreText.setStroke('#92400e', 3);
+  this.gameOverScreen.add(finalScoreText);
   
   // Mensaje adicional
   const messageText = this.add.text(playerX, playerY - 20, 'Los enemigos te han derrotado', {
