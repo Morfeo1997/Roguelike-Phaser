@@ -270,15 +270,15 @@ private showLevelUpNotification() {
 
   private showScorePopup(points: number) {
   // Obtener posición del último enemigo derrotado (aprox. centro de pantalla)
-  const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
-  const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
+  const playerX = this.player.sprite.x;
+  const playerY = this.player.sprite.y;
   
   const scoreText = this.add.text(
-    centerX,
-    centerY - 100,
+    playerX,
+    playerY - 40,
     `+${points}`,
     {
-      fontSize: '32px',
+      fontSize: '20px',
       color: '#fbbf24',
       fontStyle: 'bold'
     }
@@ -286,13 +286,12 @@ private showLevelUpNotification() {
   scoreText.setOrigin(0.5);
   scoreText.setStroke('#92400e', 4);
   scoreText.setShadow(0, 2, '#000000', 6, false, true);
-  scoreText.setScrollFactor(0);
   scoreText.setDepth(999);
   
   // Animación de flotación
   this.tweens.add({
     targets: scoreText,
-    y: centerY - 150,
+    y: playerY - 150,
     alpha: 0,
     scale: 1.5,
     duration: 1000,
