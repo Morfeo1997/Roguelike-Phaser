@@ -28,8 +28,14 @@ export class Player {
   'player-attack-2', 
   'player-attack-3'
   ];
+  private attackAnimationFrames2: string[] = [
+  'player-attack-3',
+  'player-attack-2', 
+  'player-attack-1'
+  ];
   private currentAttackFrame: number = 0;
   private attackAnimationSpeed: number = 50;
+  private useAlternateAttack: boolean = false;
   private walkAnimationSpeed: number = 200; // Tiempo entre cambios (200ms)
   private walkAnimationTimer?: Phaser.Time.TimerEvent;
   private isWalking: boolean = false;
@@ -312,12 +318,16 @@ private stopWalkAnimation() {
 
   private playAttackAnimation() {
   this.currentAttackFrame = 0;
+
+  const frames = this.useAlternateAttack 
+    ? this.attackAnimationFrames2 
+    : this.attackAnimationFrames;
   
   // Crear intervalo para cambiar frames
   const animateAttack = () => {
-    if (this.currentAttackFrame < this.attackAnimationFrames.length) {
+    if (this.currentAttackFrame < frames.length) {
       // Cambiar al siguiente frame
-      this.sprite.setTexture(this.attackAnimationFrames[this.currentAttackFrame]);
+      this.sprite.setTexture(frames[this.currentAttackFrame]);
       this.currentAttackFrame++;
       
       // Programar siguiente frame
@@ -330,6 +340,7 @@ private stopWalkAnimation() {
   
   // Iniciar animación
   animateAttack();
+  this.useAlternateAttack = !this.useAlternateAttack;
 }
 
 
