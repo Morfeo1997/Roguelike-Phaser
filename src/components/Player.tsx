@@ -382,6 +382,7 @@ private stopWalkAnimation() {
     if (this.isWalking) {
     this.stopWalkAnimation();
     }
+    this.sprite.setTexture('player-dash');
     this.jumpSound.play();
 
 
@@ -414,6 +415,7 @@ private stopWalkAnimation() {
       onComplete: () => {
         this.isDashing = false;
         this.dashEffect.stop();
+        this.sprite.setTexture('player-sprite');
       }
     });
   }
