@@ -13,7 +13,7 @@ export class Player {
   private attackCooldown: number = 0;
   private dashCooldown: number = 0;
   private attackEffect!: Phaser.GameObjects.Arc;
-  private dashEffect!: Phaser.GameObjects.Particles.ParticleEmitter;
+  
   private health: number = 3;
   private maxHealth: number = 3;
   private isInvulnerable: boolean = false;
@@ -68,7 +68,6 @@ export class Player {
     
     // Crear efectos de ataque y dash
     this.createAttackEffect();
-    this.createDashEffect();
   }
 
   
@@ -94,17 +93,7 @@ export class Player {
     this.attackEffect.setVisible(false);
   }
 
-  private createDashEffect() {
-    this.dashEffect = this.scene.add.particles(0, 0, 'player-sprite', {
-      scale: { start: 0.1, end: 0 },
-      speed: { min: 300, max: 400 },
-      lifespan: 300,
-      quantity: 3,
-      tint: 0x00ff88,
-      alpha: { start: 0.5, end: 0 },
-      emitting: false
-    });
-  }
+  
 
   public increaseMaxHealth(amount: number) {
   this.maxHealth += amount;
@@ -388,8 +377,7 @@ private stopWalkAnimation() {
 
 
     // Activar efecto de partículas
-    this.dashEffect.setPosition(this.sprite.x, this.sprite.y);
-    this.dashEffect.start();
+    
 
     // Aplicar impulso de dash
     const dashForce = 800;
@@ -405,6 +393,8 @@ private stopWalkAnimation() {
       this.sprite.setFlipX(true);
     }
 
+    
+
     // Efecto visual de dash
     this.scene.tweens.add({
       targets: this.sprite,
@@ -414,7 +404,6 @@ private stopWalkAnimation() {
       repeat: 2,
       onComplete: () => {
         this.isDashing = false;
-        this.dashEffect.stop();
         this.sprite.setTexture('player-sprite');
       }
     });
