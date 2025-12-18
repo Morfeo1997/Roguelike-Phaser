@@ -376,11 +376,32 @@ private stopWalkAnimation() {
 
 
 
-    // Activar efecto de partículas
+    
+    this.scene.tweens.add({
+    targets: this.sprite,
+    scaleX: 0,
+    scaleY: 0,
+    duration: 50,
+    ease: 'Power2',
+    onComplete: () => {
+      // Cambiar sprite
+      this.sprite.setTexture('player-dash');
+      
+      // Reaparecer con el nuevo sprite
+      this.scene.tweens.add({
+        targets: this.sprite,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 50,
+        ease: 'Back.easeOut'
+      });
+    }
+  });
+  
     
 
     // Aplicar impulso de dash
-    const dashForce = 800;
+    const dashForce = 1200;
     this.sprite.setVelocity(
       movementVector.x * dashForce,
       movementVector.y * dashForce
@@ -396,16 +417,35 @@ private stopWalkAnimation() {
     
 
     // Efecto visual de dash
+    this.scene.time.delayedCall(50, () => {
     this.scene.tweens.add({
-      targets: this.sprite,
-      alpha: 0.6,
-      duration: 50,
-      yoyo: true,
-      repeat: 2,
-      onComplete: () => {
-        this.isDashing = false;
-        this.sprite.setTexture('player-sprite');
-      }
+        targets: this.sprite,
+        alpha: 0.8,
+        duration: 40,
+        yoyo: true,
+        repeat: 2,
+        onComplete: () => {
+          this.isDashing = false;
+          
+          // Transición de vuelta al sprite normal
+          this.scene.tweens.add({
+            targets: this.sprite,
+            scaleX: 0,
+            scaleY: 0,
+            duration: 50,
+            onComplete: () => {
+              this.sprite.setTexture('player-sprite');
+              this.scene.tweens.add({
+                targets: this.sprite,
+                scaleX: 1,
+                scaleY: 1,
+                duration: 50,
+                ease: 'Back.easeOut'
+              });
+            }
+          });
+        }
+      });
     });
   }
 
