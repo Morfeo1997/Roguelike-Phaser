@@ -36,7 +36,10 @@ export class GameScene extends Phaser.Scene {
 
   // ¡NUEVO! Método preload para cargar la imagen del jugador
   preload() {
-    this.load.image('bg-tile', 'assets/backgrounds/grass-tile.png');
+    this.load.image('bg-tile-1', 'assets/backgrounds/grass-tile.png');
+    this.load.image('bg-tile-2', 'assets/backgrounds/grass-tile-2.png');
+    this.load.image('bg-tile-3', 'assets/backgrounds/grass-tile-3.png');
+    this.load.image('bg-tile-4', 'assets/backgrounds/grass-tile-4.png');
     // Cargar la imagen del jugador desde assets/sprites/player.png
     this.load.image('player-sprite', 'assets/sprites/player/player-move-1.png');
     this.load.image('player-walk', 'assets/sprites/player/player-move-2.png');
@@ -69,10 +72,12 @@ export class GameScene extends Phaser.Scene {
   create() {
     // Crear el mundo expandido
     this.createWorld();
-
+    {/*
     this.background = this.add.tileSprite(0, 0, 2000, 1500, 'bg-tile');
     this.background.setOrigin(0, 0);
-
+    */}
+    this.background.setOrigin(0, 0);
+    this.createVariedBackground();
     this.sound.volume = 0.7;
     
     // Crear elementos decorativos
@@ -181,6 +186,29 @@ export class GameScene extends Phaser.Scene {
       const rangedEnemy = new RangedEnemy(this, x!, y!, this.player.sprite);
       this.rangedEnemies.push(rangedEnemy);
       this.enemyGroup.add(rangedEnemy.getSprite());
+    }
+  }
+}
+
+private createVariedBackground() {
+  const worldWidth = 2000;
+  const worldHeight = 1500;
+  const tileSize = 24; // Tamaño de cada tile (ajusta según tu sprite)
+  
+  // Array con los nombres de los tiles
+  const tileNames = ['bg-tile-1', 'bg-tile-2', 'bg-tile-3', 'bg-tile-4'];
+  
+  // Crear una cuadrícula de tiles
+  for (let x = 0; x < worldWidth; x += tileSize) {
+    for (let y = 0; y < worldHeight; y += tileSize) {
+      // Elegir un tile aleatorio
+      const randomTile = Phaser.Math.RND.pick(tileNames);
+      
+      // Crear el tile
+      const tile = this.add.image(x, y, randomTile);
+      tile.setOrigin(0, 0);
+      tile.setDisplaySize(tileSize, tileSize);
+      
     }
   }
 }
