@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { GameScene } from './GameScene';
 import { UIScene } from './UiScene';
+import { MenuScene } from './MenuScene';
 
 interface GameContainerProps {
   width?: number;
@@ -31,7 +32,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           debug: false
         }
       },
-      scene: [GameScene, UIScene],
+      scene: [MenuScene, GameScene, UIScene],
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,

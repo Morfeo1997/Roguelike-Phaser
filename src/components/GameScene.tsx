@@ -70,6 +70,7 @@ export class GameScene extends Phaser.Scene {
   create() {
     // Crear el mundo expandido
     this.createWorld();
+    this.scene.launch('UIScene');
     {/*
     this.background = this.add.tileSprite(0, 0, 2000, 1500, 'bg-tile');
     this.background.setOrigin(0, 0);
@@ -876,6 +877,10 @@ private showHealthNotification(message: string, color: number) {
   private restartGame() {
     this.isGameOver = false;
     this.gameOverScreen.setVisible(false);
+
+    if (!this.scene.isActive('UIScene')) {
+    this.scene.launch('UIScene');
+    }
 
     this.currentLevel = 1;
     this.registry.set('currentLevel', this.currentLevel);
