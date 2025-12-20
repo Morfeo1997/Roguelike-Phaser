@@ -47,19 +47,17 @@ export class GameScene extends Phaser.Scene {
     this.load.image('player-attack-1', 'assets/sprites/player/player-attack-1.png');
     this.load.image('player-attack-2', 'assets/sprites/player/player-attack-2.png');
     this.load.image('player-attack-3', 'assets/sprites/player/player-attack-3.png');
-
     this.load.image('projectile-sprite', 'assets/sprites/enemies/projectile.png');
-
     this.load.image('heart-red', 'assets/sprites/items/heart.png');
     this.load.image('heart-golden', 'assets/sprites/items/gold-heart.png');
-    
-    // Si más adelante quieres agregar otros sprites, puedes hacerlo aquí:
-
     this.load.image('enemy-melee-sprite', 'assets/sprites/enemies/enemy-melee.png');
     this.load.image('enemy-ranged-sprite', 'assets/sprites/enemies/enemy-ranged.png');
-
-    this.load.image('tree-sprite', 'assets/sprites/tree.png');
-    this.load.image('rock-sprite', 'assets/sprites/rock.png');
+    this.load.image('tree-sprite', 'assets/sprites/tree-2.png');
+    this.load.image('rock-sprite-1', 'assets/sprites/rock.png');
+    this.load.image('rock-sprite-2', 'assets/sprites/rock-2.png');
+    this.load.image('rock-sprite-3', 'assets/sprites/rock-3.png');
+    this.load.image('rock-sprite-4', 'assets/sprites/rock-4.png');
+    //Musica y efectos de sonido
     this.load.audio('background-music', 'assets/sounds/music/bg-music.wav');
     this.load.audio('enemy-damage-sound', 'assets/sounds/effects/enemy-damage.wav');
     this.load.audio('player-damage-sound', 'assets/sounds/effects/player-damage.wav');
@@ -424,7 +422,9 @@ private showLevelUpNotification() {
   }
 
   private createRock(x: number, y: number) {
-    const rock = this.add.sprite(x, y, 'rock-sprite');
+    const rockVariants = ['rock-sprite-1', 'rock-sprite-2', 'rock-sprite-3', 'rock-sprite-4'];
+    const randomRock = Phaser.Math.RND.pick(rockVariants);
+    const rock = this.add.sprite(x, y, randomRock);
 
     const scale = Phaser.Math.FloatBetween(0.8, 1.2);
     rock.setScale(scale);
