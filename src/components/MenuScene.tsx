@@ -6,8 +6,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   preload() {
-    // Cargar recursos específicos del menú si los hay
-    // Por ejemplo: logo, botones, etc.
+    
   }
 
   create() {
@@ -18,7 +17,7 @@ export class MenuScene extends Phaser.Scene {
     const title = this.add.text(
       this.cameras.main.width / 2,
       150,
-      'CHRONO-BLADE\nASCENT',
+      'Roguelike en Phaser',
       {
         fontSize: '48px',
         color: '#fbbf24',

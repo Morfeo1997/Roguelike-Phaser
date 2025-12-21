@@ -525,6 +525,7 @@ private stopWalkAnimation() {
   }
 
   public reset(x: number, y: number) {
+    //this.maxHealth = 3;
     this.health = this.maxHealth;
     this.isDead = false;
     this.isInvulnerable = false;
