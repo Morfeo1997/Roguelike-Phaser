@@ -30,6 +30,8 @@ export class GameScene extends Phaser.Scene {
   private healthItems: HealthItem[] = [];
   private score: number = 0;
   private basePointsPerEnemy: number = 10;
+  private isPaused: boolean = false; 
+  private pauseScreen!: Phaser.GameObjects.Container;  
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -119,6 +121,10 @@ export class GameScene extends Phaser.Scene {
     
     // Crear pantalla de Game Over (inicialmente oculta)
     this.createGameOverScreen();
+
+    this.createPauseScreen();
+
+    this.setupPauseControl();
   }
 
   private createEnemies() {
@@ -470,6 +476,17 @@ private showLevelUpNotification() {
     this.input.mouse!.disableContextMenu();
   }
 
+  private setupPauseControl() {
+  // Configurar tecla ESC
+  const escKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+  
+  escKey.on('down', () => {
+    if (!this.isGameOver) {
+      this.togglePause();
+    }
+  });
+}
+
   private setupCamera() {
     // Configurar cámara para seguir al jugador
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
@@ -746,6 +763,18 @@ private showHealthNotification(message: string, color: number) {
     this.gameOverScreen.setVisible(false);
   }
 
+  private createPauseScreen() {
+    // Crear container para la pantalla de pausa
+    this.pauseScreen = this.add.container(0, 0);
+    this.pauseScreen.setDepth(1000);
+    
+    // Configurar para que siga al jugador
+    this.pauseScreen.setScrollFactor(1);
+    
+    // Ocultar inicialmente
+    this.pauseScreen.setVisible(false);
+  }
+
   private buildGameOverUI() {
   // Limpiar cualquier elemento previo del container
   this.gameOverScreen.removeAll(true);
@@ -844,6 +873,197 @@ private showHealthNotification(message: string, color: number) {
   });
 }
 
+private buildPauseUI() {
+  // Limpiar cualquier elemento previo
+  this.pauseScreen.removeAll(true);
+  
+  // Obtener la posición actual del jugador
+  const playerX = this.player.sprite.x;
+  const playerY = this.player.sprite.y;
+  
+  // Fondo semi-transparente
+  const overlay = this.add.rectangle(
+    playerX,
+    playerY,
+    this.cameras.main.width * 2,
+    this.cameras.main.height * 2,
+    0x000000,
+    0.7
+  );
+  this.pauseScreen.add(overlay);
+  
+  // Panel principal
+  const panel = this.add.rectangle(playerX, playerY, 400, 350, 0x1e293b, 0.95);
+  panel.setStrokeStyle(4, 0x475569);
+  this.pauseScreen.add(panel);
+  
+  // Título "PAUSA"
+  const pauseText = this.add.text(playerX, playerY - 100, 'PAUSA', {
+    fontSize: '64px',
+    color: '#fbbf24',
+    fontStyle: 'bold'
+  });
+  pauseText.setOrigin(0.5);
+  pauseText.setStroke('#92400e', 6);
+  pauseText.setShadow(0, 4, '#000000', 10, false, true);
+  this.pauseScreen.add(pauseText);
+  
+  // Información del nivel y puntuación
+  const infoText = this.add.text(
+    playerX,
+    playerY - 30,
+    `Nivel: ${this.currentLevel}\nPuntuación: ${this.score.toLocaleString()}`,
+    {
+      fontSize: '20px',
+      color: '#cbd5e1',
+      align: 'center'
+    }
+  );
+  infoText.setOrigin(0.5);
+  this.pauseScreen.add(infoText);
+  
+  // Botón "Continuar"
+  const continueButton = this.add.rectangle(playerX, playerY + 40, 220, 50, 0x10b981);
+  continueButton.setStrokeStyle(2, 0x34d399);
+  continueButton.setInteractive({ useHandCursor: true });
+  this.pauseScreen.add(continueButton);
+  
+  const continueText = this.add.text(playerX, playerY + 40, 'Continuar (ESC)', {
+    fontSize: '18px',
+    color: '#ffffff',
+    fontStyle: 'bold'
+  });
+  continueText.setOrigin(0.5);
+  this.pauseScreen.add(continueText);
+  
+  // Botón "Volver al menú"
+  const menuButton = this.add.rectangle(playerX, playerY + 110, 220, 50, 0x3b82f6);
+  menuButton.setStrokeStyle(2, 0x60a5fa);
+  menuButton.setInteractive({ useHandCursor: true });
+  this.pauseScreen.add(menuButton);
+  
+  const menuText = this.add.text(playerX, playerY + 110, 'Volver al Menú', {
+    fontSize: '18px',
+    color: '#ffffff',
+    fontStyle: 'bold'
+  });
+  menuText.setOrigin(0.5);
+  this.pauseScreen.add(menuText);
+  
+  // Efectos hover botón continuar
+  continueButton.on('pointerover', () => {
+    continueButton.setFillStyle(0x059669);
+    this.tweens.add({
+      targets: continueButton,
+      scaleX: 1.05,
+      scaleY: 1.05,
+      duration: 100
+    });
+  });
+  
+  continueButton.on('pointerout', () => {
+    continueButton.setFillStyle(0x10b981);
+    this.tweens.add({
+      targets: continueButton,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 100
+    });
+  });
+  
+  // Efectos hover botón menú
+  menuButton.on('pointerover', () => {
+    menuButton.setFillStyle(0x2563eb);
+    this.tweens.add({
+      targets: menuButton,
+      scaleX: 1.05,
+      scaleY: 1.05,
+      duration: 100
+    });
+  });
+  
+  menuButton.on('pointerout', () => {
+    menuButton.setFillStyle(0x3b82f6);
+    this.tweens.add({
+      targets: menuButton,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 100
+    });
+  });
+  
+  // Funcionalidad botones
+  continueButton.on('pointerdown', () => {
+    this.togglePause();
+  });
+  
+  menuButton.on('pointerdown', () => {
+    this.returnToMenu();
+  });
+}
+
+private togglePause() {
+  this.isPaused = !this.isPaused;
+  
+  if (this.isPaused) {
+    // Pausar el juego
+    this.physics.pause();
+    
+    // Pausar el temporizador
+    if (this.gameTimer) {
+      this.gameTimer.paused = true;
+    }
+    
+    // Construir y mostrar UI de pausa
+    this.buildPauseUI();
+    this.pauseScreen.setVisible(true);
+    
+    // Animación de entrada
+    this.pauseScreen.setAlpha(0);
+    this.pauseScreen.setScale(0.8);
+    this.tweens.add({
+      targets: this.pauseScreen,
+      alpha: 1,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 300,
+      ease: 'Back.easeOut'
+    });
+    
+    // Pausar la música
+    if (this.backgroundMusic && this.backgroundMusic.isPlaying) {
+      this.backgroundMusic.pause();
+    }
+  } else {
+    // Reanudar el juego
+    this.pauseScreen.setVisible(false);
+    this.physics.resume();
+    
+    // Reanudar el temporizador
+    if (this.gameTimer) {
+      this.gameTimer.paused = false;
+    }
+    
+    // Reanudar la música
+    if (this.backgroundMusic && !this.backgroundMusic.isPlaying) {
+      this.backgroundMusic.resume();
+    }
+  }
+}
+
+private returnToMenu() {
+  // Detener música
+  if (this.backgroundMusic) {
+    this.backgroundMusic.stop();
+  }
+  
+  // Detener UIScene
+  this.scene.stop('UIScene');
+  
+  // Volver al menú
+  this.scene.start('MenuScene');
+}
+
   private showGameOver(message: string = 'Los enemigos te han derrotado') {
     this.isGameOver = true;
     
@@ -923,7 +1143,7 @@ private showHealthNotification(message: string, color: number) {
   }
 
   update() {
-    if (this.isGameOver) return;
+    if (this.isGameOver || this.isPaused) return;
     
     this.currentMovementVector = this.getInputVector();
     this.player.update(this.currentMovementVector);
