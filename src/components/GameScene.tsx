@@ -71,6 +71,8 @@ export class GameScene extends Phaser.Scene {
 
   create() {
     // Crear el mundo expandido
+    this.scene.stop('UIScene');
+    this.scene.launch('UIScene');
     this.createWorld();
     this.scene.launch('UIScene');
     {/*
@@ -937,18 +939,7 @@ private buildPauseUI() {
   this.pauseScreen.add(continueText);
   
   // Botón "Volver al menú"
-  const menuButton = this.add.rectangle(playerX, playerY + 110, 220, 50, 0x3b82f6);
-  menuButton.setStrokeStyle(2, 0x60a5fa);
-  menuButton.setInteractive({ useHandCursor: true });
-  this.pauseScreen.add(menuButton);
   
-  const menuText = this.add.text(playerX, playerY + 110, 'Volver al Menú', {
-    fontSize: '18px',
-    color: '#ffffff',
-    fontStyle: 'bold'
-  });
-  menuText.setOrigin(0.5);
-  this.pauseScreen.add(menuText);
   
   // Efectos hover botón continuar
   continueButton.on('pointerover', () => {
@@ -971,35 +962,12 @@ private buildPauseUI() {
     });
   });
   
-  // Efectos hover botón menú
-  menuButton.on('pointerover', () => {
-    menuButton.setFillStyle(0x2563eb);
-    this.tweens.add({
-      targets: menuButton,
-      scaleX: 1.05,
-      scaleY: 1.05,
-      duration: 100
-    });
-  });
-  
-  menuButton.on('pointerout', () => {
-    menuButton.setFillStyle(0x3b82f6);
-    this.tweens.add({
-      targets: menuButton,
-      scaleX: 1,
-      scaleY: 1,
-      duration: 100
-    });
-  });
-  
   // Funcionalidad botones
   continueButton.on('pointerdown', () => {
     this.togglePause();
   });
   
-  menuButton.on('pointerdown', () => {
-    this.returnToMenu();
-  });
+  
 }
 
 private togglePause() {
@@ -1049,19 +1017,6 @@ private togglePause() {
       this.backgroundMusic.resume();
     }
   }
-}
-
-private returnToMenu() {
-  // Detener música
-  if (this.backgroundMusic) {
-    this.backgroundMusic.stop();
-  }
-  
-  // Detener UIScene
-  this.scene.stop('UIScene');
-  
-  // Volver al menú
-  this.scene.start('MenuScene');
 }
 
   private showGameOver(message: string = 'Los enemigos te han derrotado') {

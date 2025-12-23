@@ -61,7 +61,11 @@ export class MenuScene extends Phaser.Scene {
     
     // Iniciar juego al hacer clic
     playButton.on('pointerdown', () => {
-      this.scene.start('GameScene');
+      this.scene.stop('MenuScene');
+      // CAMBIADO: Usar restart para reiniciar completamente
+      if (this.scene.get('GameScene')) {
+        this.scene.start('GameScene'); // Esto reinicia la escena desde cero
+      }
     });
     
     // Instrucciones
