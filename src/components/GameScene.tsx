@@ -470,6 +470,15 @@ private showLevelUpNotification() {
         this.player.attack(worldX, worldY, this.enemies, this.rangedEnemies);
       } else if (pointer.rightButtonDown()) {
         // Click derecho para dash
+        const worldX = pointer.worldX;
+        const worldY = pointer.worldY;
+        this.player.shootProjectile(worldX, worldY);
+      }
+    });
+    const spaceKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+  
+    spaceKey.on('down', () => {
+      if (!this.isGameOver && !this.isPaused) {
         this.player.dash(this.currentMovementVector);
       }
     });
@@ -1102,6 +1111,8 @@ private togglePause() {
     
     this.currentMovementVector = this.getInputVector();
     this.player.update(this.currentMovementVector);
+
+    this.player.checkProjectileHits(this.enemies, this.rangedEnemies)
     
     // Verificar si el jugador murió
     if (this.player.getIsDead() && !this.isGameOver) {
@@ -1146,6 +1157,7 @@ private togglePause() {
     // Actualizar información de cooldowns
     this.registry.set('attackCooldown', this.player.getAttackCooldownPercent());
     this.registry.set('dashCooldown', this.player.getDashCooldownPercent());
+    this.registry.set('shootCooldown', this.player.getShootCooldownPercent());
     
     // Actualizar contador de enemigos
     this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length);

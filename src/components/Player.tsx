@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Enemy } from './Enemy';
 import { RangedEnemy } from './RangedEnemy';
+import { Projectile } from './Projectile';
 
 export class Player {
   public sprite!: Phaser.Physics.Arcade.Sprite;
@@ -40,6 +41,9 @@ export class Player {
   private walkAnimationTimer?: Phaser.Time.TimerEvent;
   private isWalking: boolean = false;
   private isWalkFrameAlternate: boolean = false;
+  private projectiles: Projectile[] = [];
+  private shootCooldown: number = 0;
+  private shootCooldownTime: number = 800;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
@@ -139,6 +143,11 @@ export class Player {
     if (this.dashCooldown > 0) {
       this.dashCooldown -= this.scene.game.loop.delta;
     }
+    if (this.shootCooldown > 0) {
+    this.shootCooldown -= this.scene.game.loop.delta;
+    }
+
+    this.updateProjectiles();
 
     const isMoving = (inputVector.x !== 0 || inputVector.y !== 0);
     // Aplicar movimiento
@@ -305,6 +314,56 @@ private stopWalkAnimation() {
     }
   }
 
+  public shootProjectile(targetX: number, targetY: number) {
+    if (this.shootCooldown > 0) return;
+
+    this.shootCooldown = this.shootCooldownTime;
+    
+    // Sonido de disparo (puedes usar el mismo del ataque o agregar uno nuevo)
+    this.attackSound.play();
+    
+    // Crear proyectil
+    const projectile = new Projectile(
+      this.scene,
+      this.sprite.x,
+      this.sprite.y,
+      targetX,
+      targetY,
+      2 // daño del proyectil del jugador (ajusta según balance)
+    );
+    
+    this.projectiles.push(projectile);
+    
+    // Voltear sprite según dirección del disparo
+    const dx = targetX - this.sprite.x;
+    if (dx > 0) {
+      this.sprite.setFlipX(false);
+    } else if (dx < 0) {
+      this.sprite.setFlipX(true);
+    }
+    
+    // Efecto visual de disparo
+    const muzzleFlash = this.scene.add.circle(
+      this.sprite.x,
+      this.sprite.y,
+      12,
+      0x60a5fa, // Color azul para diferenciar del enemigo
+      0.8
+    );
+    
+    this.scene.tweens.add({
+      targets: muzzleFlash,
+      scaleX: 2,
+      scaleY: 2,
+      alpha: 0,
+      duration: 200,
+      ease: 'Power2',
+      onComplete: () => {
+        muzzleFlash.destroy();
+      }
+    });
+  }
+
   private playAttackAnimation() {
   this.currentAttackFrame = 0;
 
@@ -358,6 +417,55 @@ private stopWalkAnimation() {
       
       if (distance <= this.attackRange) {
         rangedEnemy.takeDamage(1);
+      }
+    });
+  }
+
+  private updateProjectiles() {
+  this.projectiles = this.projectiles.filter(projectile => {
+    const shouldRemove = projectile.update();
+    return !shouldRemove;
+  });
+  }
+
+  public checkProjectileHits(enemies: Enemy[], rangedEnemies: RangedEnemy[]) {
+    this.projectiles.forEach((projectile, index) => {
+      // Verificar colisión con enemigos cuerpo a cuerpo
+      for (const enemy of enemies) {
+        if (!enemy.isEnemyAlive()) continue;
+        
+        const distance = Phaser.Math.Distance.Between(
+          projectile.getSprite().x,
+          projectile.getSprite().y,
+          enemy.getSprite().x,
+          enemy.getSprite().y
+        );
+        
+        if (distance <= 20) {
+          enemy.takeDamage(projectile.getDamage());
+          projectile.hitTarget();
+          this.projectiles.splice(index, 1);
+          return; // Salir del loop después de impactar
+        }
+      }
+      
+      // Verificar colisión con enemigos a distancia
+      for (const rangedEnemy of rangedEnemies) {
+        if (!rangedEnemy.isEnemyAlive()) continue;
+        
+        const distance = Phaser.Math.Distance.Between(
+          projectile.getSprite().x,
+          projectile.getSprite().y,
+          rangedEnemy.getSprite().x,
+          rangedEnemy.getSprite().y
+        );
+        
+        if (distance <= 20) {
+          rangedEnemy.takeDamage(projectile.getDamage());
+          projectile.hitTarget();
+          this.projectiles.splice(index, 1);
+          return;
+        }
       }
     });
   }
@@ -457,6 +565,9 @@ private stopWalkAnimation() {
   public getDashCooldownPercent(): number {
     return Math.max(0, this.dashCooldown / 1000);
   }
+  public getShootCooldownPercent(): number {
+  return Math.max(0, this.shootCooldown / this.shootCooldownTime);
+  }
 
   public takeDamage(damage: number = 1): boolean {
     if (this.isInvulnerable || this.isDead) return false;
@@ -531,6 +642,7 @@ private stopWalkAnimation() {
     this.isInvulnerable = false;
     this.attackCooldown = 0;
     this.dashCooldown = 0;
+    this.shootCooldown = 0;
     this.isAttacking = false;
     this.isDashing = false;
     this.lastDamageTime = 0;
@@ -538,7 +650,9 @@ private stopWalkAnimation() {
     if (this.isWalking) {
     this.stopWalkAnimation();
     }
-    
+
+    this.projectiles.forEach(projectile => projectile.destroy());
+    this.projectiles = [];
     this.sprite.setPosition(x, y);
     this.sprite.setScale(1);
     this.sprite.setAlpha(1);

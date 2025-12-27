@@ -13,6 +13,9 @@ export class UIScene extends Phaser.Scene {
   private healthHearts!: Phaser.GameObjects.Image[];
   private timeText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
+  private shootCooldownBar!: Phaser.GameObjects.Rectangle;
+  private shootCooldownBg!: Phaser.GameObjects.Rectangle;
+  private shootCooldownBorder!: Phaser.GameObjects.Rectangle;
   
 
   constructor() {
@@ -143,6 +146,41 @@ export class UIScene extends Phaser.Scene {
     this.attackCooldownBar = this.add.rectangle(startX, startY, 0, barHeight, 0xff4444);
     this.attackCooldownBar.setOrigin(0, 0.5);
     this.attackCooldownBar.setScrollFactor(0);
+
+    // Barra de cooldown de disparo
+    this.add.text(startX, startY + 80, 'Disparo', {
+      fontSize: '12px',
+      color: '#e2e8f0',
+      fontStyle: 'bold'
+    }).setScrollFactor(0);
+
+    this.shootCooldownBorder = this.add.rectangle(
+      startX + barWidth / 2,
+      startY + 100,
+      barWidth + borderWidth * 2,
+      barHeight + borderWidth * 2,
+      0xffffff
+    );
+    this.shootCooldownBorder.setScrollFactor(0);
+
+    this.shootCooldownBg = this.add.rectangle(
+      startX + barWidth / 2,
+      startY + 100,
+      barWidth,
+      barHeight,
+      0x1e293b
+    );
+    this.shootCooldownBg.setScrollFactor(0);
+
+    this.shootCooldownBar = this.add.rectangle(
+      startX,
+      startY + 100,
+      0,
+      barHeight,
+      0x60a5fa // Color azul
+    );
+    this.shootCooldownBar.setOrigin(0, 0.5);
+    this.shootCooldownBar.setScrollFactor(0);
     
     // Barra de cooldown de dash
     this.add.text(startX, startY + 30, 'Salto', {
@@ -262,9 +300,11 @@ export class UIScene extends Phaser.Scene {
     // Actualizar barras de cooldown
     const attackCooldown = this.registry.get('attackCooldown') || 0;
     const dashCooldown = this.registry.get('dashCooldown') || 0;
+    const shootCooldown = this.registry.get('shootCooldown') || 0;
     
     this.attackCooldownBar.width = (1 - attackCooldown) * 120;
     this.dashCooldownBar.width = (1 - dashCooldown) * 120;
+    this.shootCooldownBar.width = (1 - shootCooldown) * 120;
 
     if (attackCooldown === 0) {
       this.attackCooldownBar.setAlpha(1);
