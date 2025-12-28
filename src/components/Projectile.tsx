@@ -7,6 +7,7 @@ export class Projectile {
   private damage: number = 1;
   private lifetime: number = 3000; // 3 segundos antes de destruirse
   private creationTime: number;
+  private spriteKey: string;
 
   constructor(
     scene: Phaser.Scene,
@@ -14,17 +15,19 @@ export class Projectile {
     y: number,
     targetX: number,
     targetY: number,
-    damage: number = 1
+    damage: number = 1,
+    spriteKey: string = 'projectile-sprite'
   ) {
     this.scene = scene;
     this.damage = damage;
+    this.spriteKey = spriteKey;
     this.creationTime = scene.time.now;
     this.create(x, y, targetX, targetY);
   }
 
   private create(x: number, y: number, targetX: number, targetY: number) {
     // Crear sprite del proyectil (usamos un círculo si no tienes sprite)
-    this.sprite = this.scene.physics.add.sprite(x, y, 'projectile-sprite');
+    this.sprite = this.scene.physics.add.sprite(x, y, this.spriteKey);
     this.sprite.setDisplaySize(12, 12);
     this.sprite.setSize(12, 12);
     
@@ -57,7 +60,7 @@ export class Projectile {
 
   private createTrailEffect() {
     // Efecto de partículas que sigue al proyectil
-    const trail = this.scene.add.particles(0, 0, 'projectile-sprite', {
+    const trail = this.scene.add.particles(0, 0, this.spriteKey, {
       scale: { start: 0.3, end: 0 },
       alpha: { start: 0.6, end: 0 },
       speed: 10,

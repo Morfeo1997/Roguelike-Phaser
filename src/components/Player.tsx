@@ -329,7 +329,8 @@ private stopWalkAnimation() {
       this.sprite.y,
       targetX,
       targetY,
-      2 // daño del proyectil del jugador (ajusta según balance)
+      1,
+      'player-projectile-sprite'// daño del proyectil del jugador (ajusta según balance)
     );
     
     this.projectiles.push(projectile);

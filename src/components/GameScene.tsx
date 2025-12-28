@@ -50,6 +50,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image('player-attack-2', 'assets/sprites/player/player-attack-2.png');
     this.load.image('player-attack-3', 'assets/sprites/player/player-attack-3.png');
     this.load.image('projectile-sprite', 'assets/sprites/enemies/projectile.png');
+    this.load.image('player-projectile-sprite', 'assets/sprites/player/projectile.png');
     this.load.image('heart-red', 'assets/sprites/items/heart.png');
     this.load.image('heart-golden', 'assets/sprites/items/gold-heart.png');
     this.load.image('enemy-melee-sprite', 'assets/sprites/enemies/enemy-melee.png');
