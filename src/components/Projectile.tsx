@@ -3,11 +3,12 @@ import Phaser from 'phaser';
 export class Projectile {
   public sprite!: Phaser.Physics.Arcade.Sprite;
   private scene: Phaser.Scene;
-  private speed: number = 150;
+  private speed: number;
   private damage: number = 1;
   private lifetime: number = 3000; // 3 segundos antes de destruirse
   private creationTime: number;
-  private spriteKey: string;
+  private spriteKey: string; 
+  private size: number;
 
   constructor(
     scene: Phaser.Scene,
@@ -16,11 +17,15 @@ export class Projectile {
     targetX: number,
     targetY: number,
     damage: number = 1,
-    spriteKey: string = 'projectile-sprite'
+    spriteKey: string = 'projectile-sprite',
+    speed: number = 150,
+    size: number = 12
   ) {
     this.scene = scene;
     this.damage = damage;
     this.spriteKey = spriteKey;
+    this.speed = speed;
+    this.size = size;
     this.creationTime = scene.time.now;
     this.create(x, y, targetX, targetY);
   }
@@ -28,8 +33,8 @@ export class Projectile {
   private create(x: number, y: number, targetX: number, targetY: number) {
     // Crear sprite del proyectil (usamos un círculo si no tienes sprite)
     this.sprite = this.scene.physics.add.sprite(x, y, this.spriteKey);
-    this.sprite.setDisplaySize(12, 12);
-    this.sprite.setSize(12, 12);
+    this.sprite.setDisplaySize(this.size, this.size);
+    this.sprite.setSize(this.size, this.size);
     
     // Calcular dirección hacia el objetivo
     const dx = targetX - x;
@@ -76,14 +81,15 @@ export class Projectile {
   public update(): boolean {
     // Verificar si el proyectil debe ser destruido por tiempo
     if (this.scene.time.now - this.creationTime > this.lifetime) {
-      this.destroy();
-      return true; // Indica que debe ser removido
+    this.destroy();
+    return true; // Indica que debe ser removido
     }
     
     // Efecto de pulsación
     const time = this.scene.time.now * 0.01;
-    const scale = 1 + Math.sin(time) * 0.2;
-    this.sprite.setScale(scale);
+    const pulseFactor = 1 + Math.sin(time) * 0.2;
+    const currentSize = this.size * pulseFactor;
+    this.sprite.setDisplaySize(currentSize, currentSize);
     
     return false;
   }
