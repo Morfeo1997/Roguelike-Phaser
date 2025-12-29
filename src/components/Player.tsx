@@ -332,7 +332,7 @@ private stopWalkAnimation() {
       1,
       'player-projectile-sprite',// daño del proyectil del jugador (ajusta según balance)
       200,                         // NUEVO: velocidad (más rápido que enemigos)
-      16 
+      15 
     );
     
     this.projectiles.push(projectile);
@@ -407,7 +407,7 @@ private stopWalkAnimation() {
       );
       
       if (distance <= this.attackRange) {
-        enemy.takeDamage(1);
+        enemy.takeDamage(2);
       }
     });
     rangedEnemies.forEach(rangedEnemy => {
@@ -419,7 +419,7 @@ private stopWalkAnimation() {
       );
       
       if (distance <= this.attackRange) {
-        rangedEnemy.takeDamage(1);
+        rangedEnemy.takeDamage(2);
       }
     });
   }
