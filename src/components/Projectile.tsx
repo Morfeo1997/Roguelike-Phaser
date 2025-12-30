@@ -5,7 +5,7 @@ export class Projectile {
   private scene: Phaser.Scene;
   private speed: number;
   private damage: number = 1;
-  private lifetime: number = 3000; // 3 segundos antes de destruirse
+  private lifetime: number = 4000; 
   private creationTime: number;
   private spriteKey: string; 
   private size: number;

@@ -24,6 +24,7 @@ export class Player {
   private attackSound!: Phaser.Sound.BaseSound;
   private damageSound!: Phaser.Sound.BaseSound;
   private jumpSound!: Phaser.Sound.BaseSound;
+  private shootSound!: Phaser.Sound.BaseSound;
   private attackAnimationFrames: string[] = [
   'player-attack-1',
   'player-attack-2', 
@@ -57,6 +58,7 @@ export class Player {
     this.attackSound = this.scene.sound.add('player-attack-sound', { volume: 0.5 });
     this.damageSound = this.scene.sound.add('player-damage-sound', { volume: 0.6 });
     this.jumpSound = this.scene.sound.add('player-jump-sound', { volume: 0.4 });
+    this.shootSound = this.scene.sound.add('player-shoot-sound', { volume: 0.5 });
     this.sprite.setCollideWorldBounds(true);
     
     // Ajustar tamaño de colisión y visual
@@ -320,7 +322,7 @@ private stopWalkAnimation() {
     this.shootCooldown = this.shootCooldownTime;
     
     // Sonido de disparo (puedes usar el mismo del ataque o agregar uno nuevo)
-    this.attackSound.play();
+    this.shootSound.play();
     
     // Crear proyectil
     const projectile = new Projectile(

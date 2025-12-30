@@ -72,7 +72,7 @@ export class MenuScene extends Phaser.Scene {
     const instructions = this.add.text(
       this.cameras.main.width / 2,
       450,
-      'WASD - Mover\nClick Izq - Atacar\nClick Der - Saltar',
+      'WASD - Mover\nClick Izq - Atacar\nClick Der - Disparar\nBarra Esp - Saltar ',
       {
         fontSize: '16px',
         color: '#cbd5e1',
