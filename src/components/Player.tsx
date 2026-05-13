@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Enemy } from './Enemy';
 import { RangedEnemy } from './RangedEnemy';
 import { Projectile } from './Projectile';
+import type { LizardEnemy } from './LizardEnemy';
 
 export class Player {
   public sprite!: Phaser.Physics.Arcade.Sprite;
@@ -433,7 +434,7 @@ private stopWalkAnimation() {
   });
   }
 
-  public checkProjectileHits(enemies: Enemy[], rangedEnemies: RangedEnemy[]) {
+  public checkProjectileHits(enemies: Enemy[], rangedEnemies: RangedEnemy[], lizardEnemies: LizardEnemy[]) {
     this.projectiles.forEach((projectile, index) => {
       // Verificar colisión con enemigos cuerpo a cuerpo
       for (const enemy of enemies) {
@@ -467,6 +468,24 @@ private stopWalkAnimation() {
         
         if (distance <= 20) {
           rangedEnemy.takeDamage(projectile.getDamage());
+          projectile.hitTarget();
+          this.projectiles.splice(index, 1);
+          return;
+        }
+      }
+
+      for (const LizardEnemy of lizardEnemies) {
+        if (!LizardEnemy.isEnemyAlive()) continue;
+        
+        const distance = Phaser.Math.Distance.Between(
+          projectile.getSprite().x,
+          projectile.getSprite().y,
+          LizardEnemy.getSprite().x,
+          LizardEnemy.getSprite().y
+        );
+        
+        if (distance <= 20) {
+          LizardEnemy.takeDamage(projectile.getDamage());
           projectile.hitTarget();
           this.projectiles.splice(index, 1);
           return;

@@ -1124,6 +1124,9 @@ private togglePause() {
     
     this.rangedEnemies.forEach(enemy => enemy.destroy());
     this.rangedEnemies = [];
+
+    this.lizardEnemies.forEach(enemy => enemy.destroy());
+    this.lizardEnemies = [];
     
     this.enemyGroup.clear(true, true);
     
@@ -1135,7 +1138,7 @@ private togglePause() {
     
     this.registry.set('playerHealth', this.player.getHealth());
     this.registry.set('playerMaxHealth', this.player.getMaxHealth());
-    this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length);
+    this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length + this.lizardEnemies.length);
     this.registry.set('attackCooldown', 0);
     this.registry.set('dashCooldown', 0);
 
@@ -1191,7 +1194,7 @@ private togglePause() {
       }
     });
 
-  const totalEnemies = this.enemies.length + this.rangedEnemies.length + this.lizardEnemies.length;
+   const totalEnemies = this.enemies.length + this.rangedEnemies.length + this.lizardEnemies.length;
   if (totalEnemies === 0 && !this.isGameOver) {
     this.levelUp();
   }
