@@ -3,6 +3,7 @@ import { Player } from './Player';
 import { Enemy } from './Enemy';
 import { RangedEnemy } from './RangedEnemy';
 import { HealthItem } from './HealthItem';
+import { LizardEnemy } from './LizardEnemy';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -11,6 +12,7 @@ export class GameScene extends Phaser.Scene {
   private enemyGroup!: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private rangedEnemies: RangedEnemy[] = [];
+  private lizardEnemies: LizardEnemy[] = [];
   private wasdKeys!: {
     w: Phaser.Input.Keyboard.Key;
     a: Phaser.Input.Keyboard.Key;
@@ -27,6 +29,7 @@ export class GameScene extends Phaser.Scene {
   private currentLevel: number = 1;
   private baseEnemyCount: number = 5; 
   private baseRangedCount: number = 3;
+  private baseLizardCount: number = 1;
   private healthItems: HealthItem[] = [];
   private score: number = 0;
   private basePointsPerEnemy: number = 10;
@@ -55,6 +58,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image('heart-golden', 'assets/sprites/items/gold-heart.png');
     this.load.image('enemy-melee-sprite', 'assets/sprites/enemies/enemy-melee.png');
     this.load.image('enemy-ranged-sprite', 'assets/sprites/enemies/enemy-ranged.png');
+    this.load.image('enemy-lizard-sprite', 'assets/sprites/enemies/enemy-lizard.png');
     this.load.image('tree-sprite', 'assets/sprites/tree-2.png');
     this.load.image('rock-sprite-1', 'assets/sprites/rock.png');
     this.load.image('rock-sprite-2', 'assets/sprites/rock-2.png');
@@ -135,6 +139,7 @@ export class GameScene extends Phaser.Scene {
   // Calcular cantidad de enemigos según el nivel
   const meleeEnemyCount = this.baseEnemyCount + (this.currentLevel - 1);
   const rangedEnemyCount = this.baseRangedCount + (this.currentLevel - 1);
+  const lizardEnemyCount = this.baseLizardCount + Math.floor((this.currentLevel - 1) * 0.5);
   
   // Crear enemigos cuerpo a cuerpo
   for (let i = 0; i < meleeEnemyCount; i++) {
@@ -195,6 +200,36 @@ export class GameScene extends Phaser.Scene {
       const rangedEnemy = new RangedEnemy(this, x!, y!, this.player.sprite);
       this.rangedEnemies.push(rangedEnemy);
       this.enemyGroup.add(rangedEnemy.getSprite());
+    }
+  }
+  // Crear enemigos lagartos
+   for (let i = 0; i < lizardEnemyCount; i++) {
+    let x, y;
+    let validPosition = false;
+    let attempts = 0;
+    
+    while (!validPosition && attempts < 20) {
+      x = Phaser.Math.Between(150, 1850);
+      y = Phaser.Math.Between(150, 1350);
+      
+      const distanceToPlayer = Phaser.Math.Distance.Between(x, y, 400, 300);
+      const minDistanceFromEdge = 100;
+      const tooCloseToEdge = 
+        x < minDistanceFromEdge || 
+        x > 2000 - minDistanceFromEdge ||
+        y < minDistanceFromEdge || 
+        y > 1500 - minDistanceFromEdge;
+      
+      if (distanceToPlayer > 250 && !tooCloseToEdge) { // Mayor distancia inicial
+        validPosition = true;
+      }
+      attempts++;
+    }
+    
+    if (validPosition) {
+      const lizardEnemy = new LizardEnemy(this, x!, y!, this.player.sprite);
+      this.lizardEnemies.push(lizardEnemy);
+      this.enemyGroup.add(lizardEnemy.getSprite());
     }
   }
 }
@@ -1114,7 +1149,7 @@ private togglePause() {
     this.currentMovementVector = this.getInputVector();
     this.player.update(this.currentMovementVector);
 
-    this.player.checkProjectileHits(this.enemies, this.rangedEnemies)
+    this.player.checkProjectileHits(this.enemies, this.rangedEnemies, this.lizardEnemies)
     
     // Verificar si el jugador murió
     if (this.player.getIsDead() && !this.isGameOver) {
@@ -1143,9 +1178,20 @@ private togglePause() {
       this.addScore(points);
       this.rangedEnemies.splice(index, 1);
     }
-  });
+    });
 
-  const totalEnemies = this.enemies.length + this.rangedEnemies.length;
+    this.lizardEnemies.forEach((enemy, index) => {
+      if (enemy.isEnemyAlive()) {
+        enemy.update();
+        enemy.checkProjectileHits(this.player.sprite);
+      } else {
+        const points = this.getPointsForEnemy();
+        this.addScore(points);
+        this.lizardEnemies.splice(index, 1);
+      }
+    });
+
+  const totalEnemies = this.enemies.length + this.rangedEnemies.length + this.lizardEnemies.length;
   if (totalEnemies === 0 && !this.isGameOver) {
     this.levelUp();
   }
@@ -1162,7 +1208,7 @@ private togglePause() {
     this.registry.set('shootCooldown', this.player.getShootCooldownPercent());
     
     // Actualizar contador de enemigos
-    this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length);
+    this.registry.set('enemyCount', totalEnemies);
     
     // Actualizar información de salud del jugador
     this.registry.set('playerHealth', this.player.getHealth());
