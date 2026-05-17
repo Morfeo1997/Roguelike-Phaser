@@ -3,6 +3,7 @@ import { Enemy } from './Enemy';
 import { RangedEnemy } from './RangedEnemy';
 import { Projectile } from './Projectile';
 import type { LizardEnemy } from './LizardEnemy';
+import { OgreEnemy } from './OgreEnemy';
 
 export class Player {
   public sprite!: Phaser.Physics.Arcade.Sprite;
@@ -257,7 +258,11 @@ private stopWalkAnimation() {
   this.isWalkFrameAlternate = false;
 }
 
-  public attack(targetX: number, targetY: number, enemies: Enemy[], rangedEnemies: RangedEnemy[] = []) {
+  public attack(targetX: number, targetY: number, 
+    enemies: Enemy[], 
+    rangedEnemies: RangedEnemy[] = [], 
+    lizardEnemies: LizardEnemy[] = [],
+    ogreEnemies: OgreEnemy[] = []) {
     if (this.attackCooldown > 0 || this.isAttacking) return;
 
     this.isAttacking = true;
@@ -313,7 +318,7 @@ private stopWalkAnimation() {
       this.sprite.setVelocity(normalizedX * 100, normalizedY * 100);
       
       // Verificar si golpeamos algún enemigo
-      this.checkEnemyHit(attackX, attackY, enemies, rangedEnemies);
+      this.checkEnemyHit(attackX, attackY, enemies, rangedEnemies, lizardEnemies, ogreEnemies);
     }
   }
 
@@ -400,7 +405,13 @@ private stopWalkAnimation() {
 
 
 
-  private checkEnemyHit(attackX: number, attackY: number, enemies: Enemy[], rangedEnemies: RangedEnemy[] = []) {
+  private checkEnemyHit(attackX: number, attackY: number,
+    enemies: Enemy[],
+    rangedEnemies: RangedEnemy[] = [],
+    lizardEnemies: LizardEnemy[] = [],
+    ogreEnemies: OgreEnemy[] = []
+  ) {
+    
     enemies.forEach(enemy => {
       if (!enemy.isEnemyAlive()) return;
       
@@ -413,6 +424,7 @@ private stopWalkAnimation() {
         enemy.takeDamage(2);
       }
     });
+
     rangedEnemies.forEach(rangedEnemy => {
       if (!rangedEnemy.isEnemyAlive()) return;
       
@@ -425,7 +437,34 @@ private stopWalkAnimation() {
         rangedEnemy.takeDamage(2);
       }
     });
-  }
+
+    lizardEnemies.forEach(lizardEnemy => {
+    if (!lizardEnemy.isEnemyAlive()) return;
+    
+    const distance = Phaser.Math.Distance.Between(
+      attackX, attackY,
+      lizardEnemy.getSprite().x, lizardEnemy.getSprite().y
+    );
+    
+    if (distance <= this.attackRange) {
+      lizardEnemy.takeDamage(1);
+    }
+  });
+  
+  // NUEVO: Verificar golpes en ogros
+  ogreEnemies.forEach(ogreEnemy => {
+    if (!ogreEnemy.isEnemyAlive()) return;
+    
+    const distance = Phaser.Math.Distance.Between(
+      attackX, attackY,
+      ogreEnemy.getSprite().x, ogreEnemy.getSprite().y
+    );
+    
+    if (distance <= this.attackRange) {
+      ogreEnemy.takeDamage(1);
+    }
+  });
+}
 
   private updateProjectiles() {
   this.projectiles = this.projectiles.filter(projectile => {
@@ -434,7 +473,7 @@ private stopWalkAnimation() {
   });
   }
 
-  public checkProjectileHits(enemies: Enemy[], rangedEnemies: RangedEnemy[], lizardEnemies: LizardEnemy[]) {
+  public checkProjectileHits(enemies: Enemy[], rangedEnemies: RangedEnemy[], lizardEnemies: LizardEnemy[], ogreEnemies: OgreEnemy[] = []) {
     this.projectiles.forEach((projectile, index) => {
       // Verificar colisión con enemigos cuerpo a cuerpo
       for (const enemy of enemies) {
@@ -491,6 +530,24 @@ private stopWalkAnimation() {
           return;
         }
       }
+
+      for (const ogreEnemy of ogreEnemies) {
+      if (!ogreEnemy.isEnemyAlive()) continue;
+      
+      const distance = Phaser.Math.Distance.Between(
+        projectile.getSprite().x,
+        projectile.getSprite().y,
+        ogreEnemy.getSprite().x,
+        ogreEnemy.getSprite().y
+      );
+      
+      if (distance <= 25) { // Radio un poco mayor por el tamaño del ogro
+        ogreEnemy.takeDamage(projectile.getDamage());
+        projectile.hitTarget();
+        this.projectiles.splice(index, 1);
+        return;
+      }
+    }
     });
   }
 

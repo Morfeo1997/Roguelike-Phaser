@@ -4,6 +4,7 @@ import { Enemy } from './Enemy';
 import { RangedEnemy } from './RangedEnemy';
 import { HealthItem } from './HealthItem';
 import { LizardEnemy } from './LizardEnemy';
+import { OgreEnemy } from './OgreEnemy';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -13,6 +14,7 @@ export class GameScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private rangedEnemies: RangedEnemy[] = [];
   private lizardEnemies: LizardEnemy[] = [];
+  private ogreEnemies: OgreEnemy[] = [];
   private wasdKeys!: {
     w: Phaser.Input.Keyboard.Key;
     a: Phaser.Input.Keyboard.Key;
@@ -59,6 +61,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image('enemy-melee-sprite', 'assets/sprites/enemies/enemy-melee.png');
     this.load.image('enemy-ranged-sprite', 'assets/sprites/enemies/enemy-ranged.png');
     this.load.image('enemy-lizard-sprite', 'assets/sprites/enemies/enemy-lizard.png');
+    this.load.image('enemy-ogre-sprite', 'assets/sprites/enemies/enemy-ogre.png');
     this.load.image('tree-sprite', 'assets/sprites/tree-2.png');
     this.load.image('rock-sprite-1', 'assets/sprites/rock.png');
     this.load.image('rock-sprite-2', 'assets/sprites/rock-2.png');
@@ -140,6 +143,9 @@ export class GameScene extends Phaser.Scene {
   const meleeEnemyCount = this.baseEnemyCount + (this.currentLevel - 1);
   const rangedEnemyCount = this.baseRangedCount + (this.currentLevel - 1);
   const lizardEnemyCount = this.baseLizardCount + Math.floor((this.currentLevel - 1) * 0.5);
+  const ogreEnemyCount = this.currentLevel >= 4 
+    ? 1 + Math.floor((this.currentLevel - 4) * 0.3) 
+    : 0;
   
   // Crear enemigos cuerpo a cuerpo
   for (let i = 0; i < meleeEnemyCount; i++) {
@@ -230,6 +236,36 @@ export class GameScene extends Phaser.Scene {
       const lizardEnemy = new LizardEnemy(this, x!, y!, this.player.sprite);
       this.lizardEnemies.push(lizardEnemy);
       this.enemyGroup.add(lizardEnemy.getSprite());
+    }
+  }
+
+  for (let i = 0; i < ogreEnemyCount; i++) {
+    let x, y;
+    let validPosition = false;
+    let attempts = 0;
+    
+    while (!validPosition && attempts < 20) {
+      x = Phaser.Math.Between(150, 1850);
+      y = Phaser.Math.Between(150, 1350);
+      
+      const distanceToPlayer = Phaser.Math.Distance.Between(x, y, 400, 300);
+      const minDistanceFromEdge = 150;
+      const tooCloseToEdge = 
+        x < minDistanceFromEdge || 
+        x > 2000 - minDistanceFromEdge ||
+        y < minDistanceFromEdge || 
+        y > 1500 - minDistanceFromEdge;
+      
+      if (distanceToPlayer > 300 && !tooCloseToEdge) { // Muy lejos del jugador inicialmente
+        validPosition = true;
+      }
+      attempts++;
+    }
+    
+    if (validPosition) {
+      const ogreEnemy = new OgreEnemy(this, x!, y!, this.player.sprite);
+      this.ogreEnemies.push(ogreEnemy);
+      this.enemyGroup.add(ogreEnemy.getSprite());
     }
   }
 }
@@ -504,7 +540,7 @@ private showLevelUpNotification() {
         // Convertir coordenadas de pantalla a coordenadas del mundo
         const worldX = pointer.worldX;
         const worldY = pointer.worldY;
-        this.player.attack(worldX, worldY, this.enemies, this.rangedEnemies);
+        this.player.attack(worldX, worldY, this.enemies, this.rangedEnemies, this.lizardEnemies, this.ogreEnemies);
       } else if (pointer.rightButtonDown()) {
         // Click derecho para dash
         const worldX = pointer.worldX;
@@ -1127,6 +1163,9 @@ private togglePause() {
 
     this.lizardEnemies.forEach(enemy => enemy.destroy());
     this.lizardEnemies = [];
+
+    this.ogreEnemies.forEach(enemy => enemy.destroy());
+    this.ogreEnemies = [];
     
     this.enemyGroup.clear(true, true);
     
@@ -1138,7 +1177,7 @@ private togglePause() {
     
     this.registry.set('playerHealth', this.player.getHealth());
     this.registry.set('playerMaxHealth', this.player.getMaxHealth());
-    this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length + this.lizardEnemies.length);
+    this.registry.set('enemyCount', this.enemies.length + this.rangedEnemies.length + this.lizardEnemies.length + this.ogreEnemies.length);
     this.registry.set('attackCooldown', 0);
     this.registry.set('dashCooldown', 0);
 
@@ -1152,7 +1191,7 @@ private togglePause() {
     this.currentMovementVector = this.getInputVector();
     this.player.update(this.currentMovementVector);
 
-    this.player.checkProjectileHits(this.enemies, this.rangedEnemies, this.lizardEnemies)
+    this.player.checkProjectileHits(this.enemies, this.rangedEnemies, this.lizardEnemies, this.ogreEnemies);
     
     // Verificar si el jugador murió
     if (this.player.getIsDead() && !this.isGameOver) {
@@ -1194,7 +1233,18 @@ private togglePause() {
       }
     });
 
-   const totalEnemies = this.enemies.length + this.rangedEnemies.length + this.lizardEnemies.length;
+    this.ogreEnemies.forEach((enemy, index) => {
+    if (enemy.isEnemyAlive()) {
+      enemy.update();
+    } else {
+      // Dar más puntos por ogro (es más difícil)
+      const points = this.getPointsForEnemy() * 3; // Triple de puntos
+      this.addScore(points);
+      this.ogreEnemies.splice(index, 1);
+    }
+    });
+
+  const totalEnemies = this.enemies.length + this.rangedEnemies.length + this.lizardEnemies.length + this.ogreEnemies.length;
   if (totalEnemies === 0 && !this.isGameOver) {
     this.levelUp();
   }
